@@ -1,0 +1,76 @@
+{
+    "name": "glitchr/omniguard",
+    "type": "library",
+    "description": "Omniguard: one contract for guarding a form - is this token valid (a captcha: ALTCHA, Turnstile, reCAPTCHA), is this content spam (Akismet), are this address, this e-mail, this name known for abuse (StopForumSpam, disposable e-mail domains) - whoever answers; and its Symfony bridge: a form field, a constraint, the ALTCHA challenge's route, a Twig function.",
+    "keywords": [
+        "captcha",
+        "spam",
+        "antispam",
+        "altcha",
+        "turnstile",
+        "recaptcha",
+        "akismet",
+        "stopforumspam",
+        "disposable-email",
+        "omniguard"
+    ],
+    "homepage": "https://github.com/glitchr-studio/omniguard",
+    "license": "LGPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Marco Meyer",
+            "email": "marco.meyer@glitchr.io"
+        }
+    ],
+    "require": {
+        "php": ">=8.2",
+        "symfony/http-client-contracts": "^3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0",
+        "psr/cache": "^2.0|^3.0",
+        "symfony/cache": "^6.4|^7.0|^8.0",
+        "symfony/config": "^6.4|^7.0|^8.0",
+        "symfony/dependency-injection": "^6.4|^7.0|^8.0",
+        "symfony/form": "^6.4|^7.0|^8.0",
+        "symfony/http-client": "^6.4|^7.0|^8.0",
+        "symfony/http-foundation": "^6.4|^7.0|^8.0",
+        "symfony/http-kernel": "^6.4|^7.0|^8.0",
+        "symfony/routing": "^6.4|^7.0|^8.0",
+        "symfony/validator": "^6.4|^7.0|^8.0",
+        "twig/twig": "^3.0"
+    },
+    "suggest": {
+        "omniguard/altcha": "ALTCHA: a proof of work served and checked by the site itself - no third party, no cookie, no consent; the default",
+        "omniguard/turnstile": "Cloudflare Turnstile: a token checked by Cloudflare's siteverify",
+        "omniguard/recaptcha": "Google reCAPTCHA: v2 checkbox and invisible, v3 score, Enterprise assessments",
+        "omniguard/akismet": "Akismet: is this content spam - comment-check, submit-spam, submit-ham",
+        "omniguard/stopforumspam": "StopForumSpam: are this IP address, this e-mail, this name reported for abuse",
+        "omniguard/disposable": "Disposable e-mail domains: a free list shipped in the package, no call",
+        "psr/cache": "A spent token remembered in a PSR-6 pool (Omniguard\\Replay\\CacheReplayStore) rather than in this process's memory",
+        "symfony/config": "In a Symfony application: the configuration of Omniguard\\Bridge\\Symfony\\OmniguardBundle",
+        "symfony/dependency-injection": "In a Symfony application: the services of Omniguard\\Bridge\\Symfony\\OmniguardBundle",
+        "symfony/http-kernel": "In a Symfony application: Omniguard\\Bridge\\Symfony\\OmniguardBundle itself",
+        "symfony/form": "In a Symfony application: Omniguard\\Bridge\\Symfony\\Form\\ChallengeType",
+        "symfony/validator": "In a Symfony application: the PassesChallenge constraint",
+        "symfony/routing": "In a Symfony application: the route that serves an ALTCHA challenge",
+        "twig/twig": "With Twig: Omniguard\\Bridge\\Twig\\OmniguardExtension, the widget printed by omniguard_widget()"
+    },
+    "autoload": {
+        "psr-4": {
+            "Omniguard\\": ""
+        },
+        "exclude-from-classmap": [
+            "/Tests/",
+            "/docker/"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Omniguard\\Tests\\": "Tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
