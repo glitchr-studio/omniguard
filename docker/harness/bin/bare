@@ -1,0 +1,202 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * Omniguard in bare PHP: no bundle, no container, no console component. The
+ * registry is built by hand from the gateway packages installed, each
+ * gateway says what it answers, then each is asked a whole question:
+ *
+ *   - altcha: a challenge issued, solved here by the ALTCHA library (what the
+ *     widget does in the browser), verified, then posted again - refused;
+ *   - turnstile: Cloudflare's testing keys, the three answers - passes,
+ *     fails, already spent;
+ *   - recaptcha: Google's v2 test keys - passes, from testkey.google.com;
+ *   - akismet: a comment that is ham, one that is spam;
+ *   - stopforumspam: a Tor exit node, then the documentation's address and
+ *     e-mail (the e-mail sent hashed);
+ *   - disposable: mailinator.com, a subdomain of yopmail.com, gmail.com;
+ *   - fixed: the gateway an application's tests use;
+ *
+ * and the script lists what PHP loaded on the way.
+ *
+ *   docker compose run --rm omniguard bare           # the providers' recorded answers: nothing leaves the machine
+ *   docker compose run --rm omniguard bare --live    # the providers themselves (Akismet only with AKISMET_API_KEY)
+ *   docker compose run --rm omniguard bare --json    # the same, whole: every class and file loaded; exit 1 if one is a framework's
+ *
+ * A gateway whose settings are not in the environment runs on the example
+ * ones of config/gateways.php. OMNIGUARD_AUTOLOAD names another autoloader
+ * than the harness's.
+ */
+
+use AltchaOrg\Altcha\Altcha;
+use AltchaOrg\Altcha\Challenge;
+use AltchaOrg\Altcha\Payload;
+use AltchaOrg\Altcha\SolveChallengeOptions;
+use Omniguard\Exception\OmniguardException;
+use Omniguard\Model\Attempt;
+use Omniguard\Model\Identity;
+use Omniguard\Model\Submission;
+use Omniguard\Registry;
+use Omniguard\Replay\InMemoryReplayStore;
+use Omniguard\Testing\FixedGateway;
+use Omniguard\Testing\FixedGatewayFactory;
+
+require getenv('OMNIGUARD_AUTOLOAD') ?: '/harness/vendor/autoload.php';
+
+$live = in_array('--live', $argv, true);
+$http = $live
+    ? Symfony\Component\HttpClient\HttpClient::create(['headers' => ['User-Agent' => 'omniguard-harness']])
+    : new Symfony\Component\HttpClient\MockHttpClient(require __DIR__.'/../config/recorded.php');
+$replays = new InMemoryReplayStore();
+
+// A factory per gateway package installed: what each needs, given by hand.
+$factories = [new FixedGatewayFactory()];
+foreach (require __DIR__.'/../plugins.php' as [, $class]) {
+    if (class_exists($class)) {
+        $factories[] = match (true) {
+            str_ends_with($class, 'AltchaGatewayFactory') => new $class($replays),
+            str_ends_with($class, 'DisposableGatewayFactory') => new $class(),
+            default => new $class($http),
+        };
+    }
+}
+$installed = array_map(static fn ($factory) => $factory->getName(), $factories);
+$config = $example = [];
+foreach (require __DIR__.'/../config/gateways.php' as $name => $gateway) {
+    if (!in_array($gateway['factory'], $installed, true)) {
+        continue;
+    }
+    $configured = [] === array_filter($gateway['needs'], static fn (string $key) => false === getenv($key) || '' === getenv($key));
+    $example[$name] = !$configured;
+    $config[$name] = ['factory' => $gateway['factory'], 'options' => $configured ? array_filter($gateway['options'], static fn ($value) => null !== $value) : $gateway['example']];
+}
+$registry = new Registry($factories, $config);
+
+$report = ['live' => $live, 'gateways' => []];
+foreach ($registry->all() as $name => $gateway) {
+    $report['gateways'][$name] = ['title' => $gateway->getTitle(), 'example' => $example[$name]] + $gateway->capabilities()->toArray();
+}
+$verdict = static fn ($v): array => ['passed' => $v->passed, 'reasons' => $v->reasons, 'codes' => $v->codes, 'action' => $v->action, 'hostname' => $v->hostname, 'score' => $v->score, 'at' => null !== $v->at];
+$ask = static function (callable $question) {
+    try {
+        return $question();
+    } catch (OmniguardException $e) {
+        return ['error' => $e::class, 'message' => $e->getMessage()];
+    }
+};
+
+if ($registry->has('altcha')) {
+    $gateway = $registry->challenge('altcha');
+    $algorithm = Omniguard\Altcha\AltchaGatewayFactory::algorithm((string) ($registry->options('altcha')['algorithm'] ?? 'PBKDF2/SHA-256'));
+    // What the widget does in the visitor's browser, done here by the ALTCHA library.
+    $solve = static function (Challenge $challenge) use ($algorithm): array {
+        $solution = (new Altcha())->solveChallenge(new SolveChallengeOptions(challenge: $challenge, algorithm: $algorithm));
+
+        return [(new Payload($challenge, $solution))->toBase64(), $solution->time];
+    };
+    $widget = $gateway->widget('contact');
+    [$token, $time] = $solve(Challenge::fromArray(json_decode((string) $widget->attributes['challenge'], true)));
+    [$other] = $solve(Challenge::fromArray($gateway->issue('signup')));
+    $report['altcha'] = [
+        'widget' => ['tag' => $widget->tag, 'field' => $widget->field, 'third_party' => $widget->thirdParty, 'cookies' => $widget->cookies, 'origins' => $widget->origins],
+        'solved_in' => round($time, 3),
+        'first' => $verdict($gateway->verify(new Attempt($token, '192.0.2.10', 'contact'))),
+        'again' => $verdict($gateway->verify(new Attempt($token, '192.0.2.10', 'contact'))),
+        'other_action' => $verdict($gateway->verify(new Attempt($other, '192.0.2.10', 'contact'))),
+    ];
+}
+
+if ($registry->has('turnstile')) {
+    // Cloudflare's testing keys, whatever is configured: a real key takes a real browser.
+    $keys = static fn (string $secret) => $registry->create('turnstile', ['site_key' => '1x00000000000000000000AA', 'secret' => $secret])->verify(new Attempt('XXXX.DUMMY.TOKEN.XXXX', '192.0.2.10', 'contact', 'www.example.org'));
+    $report['turnstile'] = [
+        'widget' => ['field' => ($w = $registry->challenge('turnstile')->widget('contact'))->field, 'third_party' => $w->thirdParty, 'origins' => $w->origins],
+        'passes' => $ask(static fn () => $verdict($keys('1x0000000000000000000000000000000AA'))),
+        'fails' => $ask(static fn () => $verdict($keys('2x0000000000000000000000000000000AA'))),
+        'spent' => $ask(static fn () => $verdict($keys('3x0000000000000000000000000000000AA'))),
+    ];
+}
+
+if ($registry->has('recaptcha')) {
+    $test = $registry->create('recaptcha', ['mode' => 'checkbox', 'site_key' => '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI', 'secret' => '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe']);
+    $report['recaptcha'] = [
+        'widget' => ['field' => ($w = $test->widget())->field, 'third_party' => $w->thirdParty, 'cookies' => $w->cookies, 'origins' => $w->origins],
+        'test_keys' => $ask(static fn () => $verdict($test->verify(new Attempt('bare-token', '192.0.2.10', hostname: 'www.example.org')))),
+        'empty' => $verdict($test->verify(new Attempt(''))),
+    ];
+}
+
+if ($registry->has('akismet')) {
+    if ($live && $example['akismet']) {
+        $report['akismet'] = ['skipped' => 'no AKISMET_API_KEY: the recorded answers only accept the example key'];
+    } else {
+        $classifier = $registry->classifier('akismet');
+        $comment = static fn (string $author, string $content) => new Submission($content, $author, 'camille@example.org', ip: '192.0.2.10', userAgent: 'Mozilla/5.0', permalink: 'https://example.org/blog/a-post', language: 'fr', date: new DateTimeImmutable());
+        $report['akismet'] = [
+            'ham' => $ask(static fn () => $classifier->classify($comment('Camille Érable', 'Thank you, this helped me understand the lease.'))->label->value),
+            'spam' => $ask(static fn () => $classifier->classify($comment('akismet-guaranteed-spam', 'Buy now'))->label->value),
+        ];
+    }
+}
+
+if ($registry->has('stopforumspam')) {
+    $list = $registry->reputation('stopforumspam');
+    $shown = static fn ($r) => ['known' => $r->known, 'frequency' => $r->frequency, 'confidence' => $r->confidence, 'reasons' => $r->reasons, 'last_seen' => null !== $r->lastSeen];
+    $report['stopforumspam'] = [
+        'tor_exit' => $ask(static fn () => $shown($list->lookup(new Identity('185.220.101.1')))),
+        'documentation' => $ask(static fn () => $shown($list->lookup(new Identity('91.186.18.61', 'g2fsehis5e@mail.ru')))),
+    ];
+}
+
+if ($registry->has('disposable')) {
+    $list = $registry->reputation('disposable');
+    foreach (['someone@mailinator.com', 'someone@eu.yopmail.com', 'someone@gmail.com'] as $email) {
+        $r = $list->lookup(new Identity(email: $email));
+        $report['disposable'][$email] = $r->known ? $r->data['matched'] : null;
+    }
+}
+
+$fixed = $registry->challenge('fixed');
+$report['fixed'] = $verdict($fixed->verify(Attempt::fromPost([FixedGateway::FIELD => FixedGateway::TOKEN], $fixed->widget())))['passed'];
+
+// What PHP loaded to get there: the proof that no framework was needed.
+$report['symbols'] = [...get_declared_classes(), ...get_declared_interfaces(), ...get_declared_traits()];
+$report['files'] = get_included_files();
+$framework = array_values(preg_grep('~^(?:Symfony\\\\Component\\\\(?:DependencyInjection|Config|HttpKernel|HttpFoundation|Form|Validator|Routing)|Symfony\\\\Bundle|Symfony\\\\Bridge|Doctrine|Twig)\\\\~', $report['symbols']));
+$symfony = array_values(array_unique(array_map(static fn (string $s) => implode('\\', array_slice(explode('\\', $s), 0, 3)), preg_grep('~^Symfony\\\\(?!Polyfill)~', $report['symbols']))));
+sort($symfony);
+
+if (in_array('--json', $argv, true)) {
+    echo json_encode($report, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), "\n";
+    exit($framework ? 1 : 0);
+}
+
+$yes = static fn (bool $v): string => $v ? 'yes' : 'no';
+$said = static fn (array $v): string => isset($v['error']) ? $v['error'].': '.$v['message'] : ($v['passed'] ? 'passed' : 'refused ('.implode(', ', $v['reasons']).($v['codes'] ? '; '.implode(', ', $v['codes']) : '').')');
+echo 'Omniguard in bare PHP: the registry built by hand, no bundle, no container; ', $live ? 'the providers themselves' : 'their recorded answers', ".\n\n";
+foreach ($report['gateways'] as $name => $g) {
+    printf("  %-14s %s: answers %s; third party %s, cookies %s%s\n", $name, $g['title'], implode(', ', $g['questions']), $yes($g['thirdParty']), $yes($g['cookies']), $g['example'] ? ' (example settings)' : '');
+}
+if ($a = $report['altcha'] ?? null) {
+    printf("\naltcha: a challenge issued, solved here in %ss\n  first post: %s; the same again: %s; issued for another action: %s\n  the widget: <%s> posting \"%s\", third party %s, scripts from %s\n", $a['solved_in'], $said($a['first']), $said($a['again']), $said($a['other_action']), $a['widget']['tag'], $a['widget']['field'], $yes($a['widget']['third_party']), implode(', ', $a['widget']['origins']) ?: 'the site');
+}
+if ($t = $report['turnstile'] ?? null) {
+    printf("\nturnstile, Cloudflare's testing keys:\n  1x: %s; 2x: %s; 3x: %s\n", $said($t['passes']), $said($t['fails']), $said($t['spent']));
+}
+if ($r = $report['recaptcha'] ?? null) {
+    printf("\nrecaptcha, Google's v2 test keys: %s%s; an empty token: %s (nothing sent)\n", $said($r['test_keys']), isset($r['test_keys']['hostname']) ? ' from '.$r['test_keys']['hostname'] : '', $said($r['empty']));
+}
+if ($k = $report['akismet'] ?? null) {
+    echo "\nakismet: ", isset($k['skipped']) ? 'skipped, '.$k['skipped'] : sprintf('a thank-you note: %s; akismet-guaranteed-spam: %s', is_array($k['ham']) ? $k['ham']['message'] : $k['ham'], is_array($k['spam']) ? $k['spam']['message'] : $k['spam']), "\n";
+}
+if ($s = $report['stopforumspam'] ?? null) {
+    $one = static fn (array $r): string => isset($r['error']) ? $r['message'] : sprintf('%s (frequency %d, confidence %s%s)', $r['known'] ? 'known' : 'unknown', $r['frequency'], $r['confidence'], $r['reasons'] ? ', '.implode(', ', $r['reasons']) : '');
+    printf("\nstopforumspam: 185.220.101.1 %s\n  91.186.18.61 + g2fsehis5e@mail.ru (hashed): %s\n", $one($s['tor_exit']), $one($s['documentation']));
+}
+if ($d = $report['disposable'] ?? null) {
+    echo "\ndisposable: ", implode('; ', array_map(static fn ($e, $m) => $e.' '.(null === $m ? 'not on the list' : 'disposable ('.$m.')'), array_keys($d), $d)), "\n";
+}
+echo "\nfixed: ", $report['fixed'] ? 'passed' : 'refused', "\n";
+echo "\nLoaded from Symfony: ", implode(', ', $symfony) ?: 'nothing', "\n";
+echo 'Classes of a framework (DependencyInjection, Config, HttpKernel, HttpFoundation, Form, Validator, Routing, a bundle or bridge, Doctrine, Twig): ', $framework ? implode(', ', $framework) : 'none', "\n";
+exit($framework ? 1 : 0);

@@ -1,0 +1,33 @@
+# glitchr/omniguard with every gateway package:
+#
+#   cp .env.dist .env                                          # the keys you have; none is needed
+#   docker compose run --rm omniguard gateways                 # which gateways are installed and configured, what each answers
+#   docker compose run --rm omniguard widget turnstile --action contact
+#   docker compose run --rm omniguard solve altcha             # an ALTCHA challenge issued and solved here: a token to verify
+#   docker compose run --rm omniguard verify turnstile XXXX.DUMMY.TOKEN.XXXX --ip 192.0.2.10
+#   docker compose run --rm omniguard classify akismet "Buy now" --author akismet-guaranteed-spam --ip 192.0.2.10
+#   docker compose run --rm omniguard lookup stopforumspam --ip 185.220.101.1
+#   docker compose run --rm omniguard lookup disposable --email someone@mailinator.com
+#   docker compose run --rm omniguard bare                     # plain PHP: no bundle, no container, recorded answers, and what PHP loaded
+#   docker compose run --rm omniguard bare --live              # the same against the providers, with their testing keys
+#   docker compose run --rm omniguard test                     # every package's tests
+#
+# Gateways come from GitHub (branch 1.x) unless their checkout sits under
+# OMNIGUARD_PLUGINS (set it to ../.. in .env when this core sits in the
+# workspace beside them): then that checkout is what runs.
+name: omniguard-harness
+
+services:
+  omniguard:
+    build: .
+    image: glitchr/omniguard-harness
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - ..:/omniguard/core
+      - ${OMNIGUARD_PLUGINS:-./plugins}:/omniguard/plugins:ro
+      - harness:/harness
+
+volumes:
+  harness:
