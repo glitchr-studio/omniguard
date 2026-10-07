@@ -5,6 +5,7 @@ namespace Omniguard\Bridge\Symfony;
 use Omniguard\Akismet\AkismetGatewayFactory;
 use Omniguard\Altcha\AltchaGatewayFactory;
 use Omniguard\Bridge\Symfony\Controller\ChallengeController;
+use Omniguard\Bridge\Symfony\EventListener\ScriptListener;
 use Omniguard\Bridge\Symfony\Form\ChallengeType;
 use Omniguard\Bridge\Symfony\Validator\PassesChallengeValidator;
 use Omniguard\Bridge\Twig\OmniguardExtension;
@@ -28,6 +29,7 @@ use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 use Symfony\Component\Routing\Attribute\Route;
@@ -51,6 +53,7 @@ use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_it
  *         challenge:
  *             gateway: forms            # the ChallengeType's, the constraint's and omniguard_widget()'s default
  *             unreachable: reject       # or accept: a provider that does not answer lets the form through
+ *         serve_scripts: true           # ALTCHA's widget served by the site (/omniguard/altcha/3.3.0/altcha.min.js), not a CDN
  *         replay:
  *             pool: cache.app           # where spent tokens are remembered; none: this process's memory
  *
@@ -111,6 +114,10 @@ final class OmniguardBundle extends AbstractBundle
                         ->enumNode('unreachable')->values(['reject', 'accept'])->defaultValue('reject')->info('When the provider does not answer: the form is refused (reject), or let through (accept).')->end()
                     ->end()
                 ->end()
+                ->booleanNode('serve_scripts')
+                    ->defaultTrue()
+                    ->info('Serve the widgets\' scripts the gateway packages ship from the site itself (ALTCHA\'s at /omniguard/altcha/<version>/altcha.min.js), and make it their gateways\' default: the page reaches nobody. false: the packages\' defaults (a CDN).')
+                ->end()
                 ->arrayNode('replay')
                     ->addDefaultsIfNotSet()
                     ->children()
@@ -132,10 +139,21 @@ final class OmniguardBundle extends AbstractBundle
     }
 
     /**
-     * @param array{gateways: array<string, array{factory: string, options: array<string, mixed>}>, challenge: array{gateway: ?string, unreachable: string}, replay: array{service: ?string, pool: ?string}} $config
+     * @param array{gateways: array<string, array{factory: string, options: array<string, mixed>}>, challenge: array{gateway: ?string, unreachable: string}, serve_scripts: bool, replay: array{service: ?string, pool: ?string}} $config
      */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
+        // The widgets' scripts from the site: ALTCHA's served by ScriptListener, and its gateways' default.
+        $scripts = [];
+        if (($config['serve_scripts'] ?? true) && class_exists(AltchaGatewayFactory::class) && \defined(AltchaGatewayFactory::class.'::SCRIPT_PATH')) {
+            $scripts[AltchaGatewayFactory::SCRIPT_PATH] = AltchaGatewayFactory::SCRIPT_FILE;
+            foreach ($config['gateways'] as $name => $gateway) {
+                if ('altcha' === $gateway['factory'] && !\array_key_exists('script', (array) $gateway['options'])) {
+                    $config['gateways'][$name]['options']['script'] = AltchaGatewayFactory::SCRIPT_PATH;
+                }
+            }
+        }
+
         $builder->registerForAutoconfiguration(GatewayFactoryInterface::class)->addTag('omniguard.gateway_factory');
         $services = $container->services();
 
@@ -189,6 +207,12 @@ final class OmniguardBundle extends AbstractBundle
             $services->set(ChallengeController::class)
                 ->args([service(Registry::class)])
                 ->tag('controller.service_arguments')
+                ->public();
+        }
+        if ([] !== $scripts && class_exists(BinaryFileResponse::class)) {
+            $services->set(ScriptListener::class)
+                ->args([$scripts])
+                ->tag('kernel.event_listener', ['event' => 'kernel.request', 'priority' => 256])
                 ->public();
         }
         if (class_exists(AbstractExtension::class)) {

@@ -11,7 +11,7 @@ visitor is asked first.
 
 | Gateway | What leaves the site | To whom | Cookies | `Widget::origins` |
 |---|---|---|---|---|
-| `altcha` | nothing: the challenge is issued and checked by the site | - | none | the widget's script host, when it is served from a CDN (`https://cdn.jsdelivr.net`); none when the site serves it |
+| `altcha` | nothing: the challenge is issued and checked by the site | - | none | none in Symfony: the bridge serves the widget's script from the site; the CDN (`https://cdn.jsdelivr.net`) in PHP alone, unless the site serves the package's copy |
 | `turnstile` | the visitor's browser talks to Cloudflare (its address, browser signals); the site sends the token and the address to `siteverify` | Cloudflare | none: "strictly necessary" signals, by Cloudflare's [Turnstile privacy addendum](https://www.cloudflare.com/turnstile-privacy-policy/) (2025-06-18) | `https://challenges.cloudflare.com` |
 | `recaptcha` | the visitor's browser talks to Google; the site sends the token and the address | Google | `_GRECAPTCHA`, "a necessary cookie" by [Google's FAQ](https://developers.google.com/recaptcha/docs/faq); `www.recaptcha.net` instead of `www.google.com` keeps google.com's other cookies away | `https://www.google.com` (or `https://www.recaptcha.net`), `https://www.gstatic.com` |
 | `akismet` | the text, the name, the e-mail, the address, the browser, the pages | Akismet (Automattic) | - | - |
@@ -37,8 +37,9 @@ draws the line by purpose:
 What follows for a site built on Omniguard - read as the CNIL's answer, not as legal advice:
 
 - **ALTCHA** reaches nobody and sets nothing: no consent to ask, nothing to declare but the
-  check itself. Serve its script from the site (`script: /js/altcha.min.js`, from the `altcha` npm
-  package) and not even a CDN sees the visitor. It is the default for that reason.
+  check itself. Its script is the site's own - served by the Symfony bridge from omniguard/altcha,
+  or copied from it in PHP alone - and not even a CDN sees the visitor. It is the default for that
+  reason.
 - **Turnstile** reaches Cloudflare: name it in the privacy policy; Cloudflare says it uses the
   signals only to tell people from bots. Whether that is "sole purpose" enough is the site's
   call, with its DPO.

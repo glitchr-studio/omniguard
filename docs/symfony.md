@@ -38,6 +38,7 @@ omniguard:
     challenge:
         gateway: forms                         # the default captcha; the first gateway when left out
         unreachable: reject                    # or accept: a provider that does not answer lets the form through
+    serve_scripts: true                        # ALTCHA's widget served by the site, not a CDN
     replay:
         pool: cache.app                        # where spent tokens are remembered (PSR-6)
         # service: App\Security\SpentTokens   # or a ReplayStoreInterface of yours, atomic
@@ -136,6 +137,15 @@ omniguard:
 `GET /omniguard/{gateway}/challenge?action=contact` (`omniguard_challenge`) answers a fresh
 challenge, `Cache-Control: no-store`; 404 for a gateway that issues none. The controller is a plain
 class: no `AbstractController`, nothing of FrameworkBundle.
+
+## The widget's script, from the site
+
+omniguard/altcha ships its widget's script (`public/altcha.min.js`, the npm package's file, MIT).
+The bundle serves it at `/omniguard/altcha/3.3.0/altcha.min.js` - answered before routing, cached a
+year, with no route to import and no asset pipeline (`ScriptListener`) - and makes that the default
+`script` of every `altcha` gateway that names none: the page reaches nobody, `Widget::$origins` is
+empty. `serve_scripts: false` leaves the package's default (jsDelivr); a `script` option given is
+the application's.
 
 ## Twig
 

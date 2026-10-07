@@ -3,6 +3,7 @@
 namespace Omniguard\Tests\Bridge;
 
 use Omniguard\Bridge\Symfony\Controller\ChallengeController;
+use Omniguard\Bridge\Symfony\EventListener\ScriptListener;
 use Omniguard\Bridge\Symfony\Form\ChallengeType;
 use Omniguard\Bridge\Symfony\OmniguardBundle;
 use Omniguard\Bridge\Symfony\Validator\PassesChallengeValidator;
@@ -119,6 +120,43 @@ final class OmniguardBundleTest extends TestCase
 
         $this->expectException(NotFoundHttpException::class);
         $controller('lists', Request::create('/omniguard/lists/challenge'));
+    }
+
+    public function testTheAltchaWidgetIsServedByTheSiteAndReachesNobody(): void
+    {
+        if (!class_exists(\Omniguard\Altcha\AltchaGatewayFactory::class)) {
+            self::markTestSkipped('omniguard/altcha is not installed.');
+        }
+        $altcha = \Omniguard\Altcha\AltchaGatewayFactory::class;
+        $container = $this->container(['gateways' => ['forms' => ['factory' => 'altcha', 'options' => ['hmac_key' => 'a-long-secret', 'cost' => 10]]]]);
+
+        $widget = $container->get(Registry::class)->challenge('forms')->widget('contact');
+        self::assertSame($altcha::SCRIPT_PATH, $widget->script, 'the site\'s own address');
+        self::assertSame([], $widget->origins);
+        self::assertFalse($widget->reachesOthers(), 'nobody else is reached: no consent to ask');
+        self::assertStringStartsWith('<script src="/omniguard/altcha/', $widget->html());
+
+        // The address answers with the package's file, cached for a year; nothing else is touched.
+        $listener = $container->get(ScriptListener::class);
+        $kernel = $this->createMock(\Symfony\Component\HttpKernel\HttpKernelInterface::class);
+        $event = new \Symfony\Component\HttpKernel\Event\RequestEvent($kernel, Request::create($altcha::SCRIPT_PATH), \Symfony\Component\HttpKernel\HttpKernelInterface::MAIN_REQUEST);
+        $listener($event);
+        $response = $event->getResponse();
+        self::assertNotNull($response);
+        self::assertSame(200, $response->getStatusCode());
+        self::assertStringStartsWith('text/javascript', (string) $response->headers->get('Content-Type'));
+        self::assertStringContainsString('immutable', (string) $response->headers->get('Cache-Control'));
+        self::assertSame(realpath($altcha::SCRIPT_FILE), realpath($response->getFile()->getPathname()));
+        $other = new \Symfony\Component\HttpKernel\Event\RequestEvent($kernel, Request::create('/contact'), \Symfony\Component\HttpKernel\HttpKernelInterface::MAIN_REQUEST);
+        $listener($other);
+        self::assertNull($other->getResponse());
+
+        // A script the application names is its own; serve_scripts: false, the package's default (the CDN).
+        $named = $this->container(['gateways' => ['forms' => ['factory' => 'altcha', 'options' => ['hmac_key' => 'k', 'script' => '/js/altcha.min.js']]]]);
+        self::assertSame('/js/altcha.min.js', $named->get(Registry::class)->challenge('forms')->widget()->script);
+        $cdn = $this->container(['serve_scripts' => false, 'gateways' => ['forms' => ['factory' => 'altcha', 'options' => ['hmac_key' => 'k']]]]);
+        self::assertSame($altcha::SCRIPT, $cdn->get(Registry::class)->challenge('forms')->widget()->script);
+        self::assertFalse($cdn->has(ScriptListener::class));
     }
 
     public function testTwigIsToldWhereTheFormThemeIs(): void
