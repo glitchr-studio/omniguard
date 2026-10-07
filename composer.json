@@ -37,7 +37,9 @@
         "symfony/http-foundation": "^6.4|^7.0|^8.0",
         "symfony/http-kernel": "^6.4|^7.0|^8.0",
         "symfony/routing": "^6.4|^7.0|^8.0",
+        "symfony/translation": "^6.4|^7.0|^8.0",
         "symfony/validator": "^6.4|^7.0|^8.0",
+        "symfony/yaml": "^6.4|^7.0|^8.0",
         "twig/twig": "^3.0"
     },
     "suggest": {
@@ -54,6 +56,7 @@
         "symfony/form": "In a Symfony application: Omniguard\\Bridge\\Symfony\\Form\\ChallengeType",
         "symfony/validator": "In a Symfony application: the PassesChallenge constraint",
         "symfony/routing": "In a Symfony application: the route that serves an ALTCHA challenge",
+        "symfony/translation": "In a Symfony application: the widgets' texts in the visitor's language (domain omniguard)",
         "twig/twig": "With Twig: Omniguard\\Bridge\\Twig\\OmniguardExtension, the widget printed by omniguard_widget()"
     },
     "autoload": {

@@ -193,9 +193,14 @@ final class OmniguardBundle extends AbstractBundle
         $builder->setParameter('omniguard.challenge.gateway', $default);
         $services->set(WidgetPrinter::class)->tag('kernel.reset', ['method' => 'reset']);
 
+        // The widgets in the visitor's language: the request's locale, the domain "omniguard" (translations/).
+        $services->set(WidgetLocalizer::class)
+            ->args([service('translator')->nullOnInvalid(), service('request_stack')->nullOnInvalid()])
+            ->public();
+
         if (class_exists(AbstractType::class)) {
             $services->set(ChallengeType::class)
-                ->args([service(Registry::class), service(WidgetPrinter::class), service('request_stack')->nullOnInvalid(), $default])
+                ->args([service(Registry::class), service(WidgetPrinter::class), service('request_stack')->nullOnInvalid(), $default, service(WidgetLocalizer::class)])
                 ->tag('form.type');
         }
         if (class_exists(ConstraintValidator::class)) {
@@ -217,7 +222,7 @@ final class OmniguardBundle extends AbstractBundle
         }
         if (class_exists(AbstractExtension::class)) {
             $services->set(OmniguardExtension::class)
-                ->args([service(Registry::class), service(WidgetPrinter::class), $default])
+                ->args([service(Registry::class), service(WidgetPrinter::class), $default, service(WidgetLocalizer::class)])
                 ->tag('twig.extension');
         }
     }

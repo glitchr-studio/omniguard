@@ -147,6 +147,17 @@ year, with no route to import and no asset pipeline (`ScriptListener`) - and mak
 empty. `serve_scripts: false` leaves the package's default (jsDelivr); a `script` option given is
 the application's.
 
+## The widget's language
+
+A gateway whose widget takes texts (`LocalizableInterface`: ALTCHA) is printed in the request's
+language, by the form type and by `omniguard_widget()` alike (`WidgetLocalizer`): its texts come
+from the translation domain `omniguard`, `<gateway>.<text>` - `altcha.label`, `altcha.verifying`,
+`altcha.verified`... -, shipped in French, English, German and Japanese
+(`Bridge/Symfony/translations/`). An application's own `translations/omniguard.<locale>.yaml`
+overrides any text, or adds a language; a language nobody translated leaves the widget's own
+English. A gateway's `language` option fixes its language whatever the visitor's, its `strings`
+option wins over the catalogues. Without `symfony/translation`, nothing changes.
+
 ## Twig
 
 For a form that is not a Symfony form:

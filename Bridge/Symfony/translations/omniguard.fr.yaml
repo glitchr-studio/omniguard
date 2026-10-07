@@ -1,0 +1,19 @@
+# The texts of the captchas' widgets (Omniguard\Bridge\Symfony\WidgetLocalizer): <gateway>.<text>.
+altcha:
+    label: "Je ne suis pas un robot"
+    verifying: "Vérification…"
+    verified: "Vérifié"
+    verificationRequired: "Vérification requise"
+    waitAlert: "Vérification en cours, merci de patienter."
+    error: "Échec de la vérification, réessayez."
+    expired: "La vérification a expiré, réessayez."
+    footer: 'Protégé par <a href="https://altcha.org/" tabindex="-1" target="_blank" rel="noopener" aria-label="ALTCHA (site officiel)">ALTCHA</a>'
+    ariaLinkLabel: "ALTCHA (site officiel)"
+    loading: "Chargement…"
+    reload: "Recharger"
+    verify: "Vérifier"
+    cancel: "Annuler"
+    enterCode: "Saisissez le code"
+    enterCodeAria: "Saisissez le code entendu. Appuyez sur Espace pour écouter."
+    enterCodeFromImage: "Pour continuer, saisissez le code de l'image ci-dessous."
+    getAudioChallenge: "Écouter le code"

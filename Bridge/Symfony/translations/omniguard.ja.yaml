@@ -1,0 +1,19 @@
+# The texts of the captchas' widgets (Omniguard\Bridge\Symfony\WidgetLocalizer): <gateway>.<text>.
+altcha:
+    label: "私はロボットではありません"
+    verifying: "確認しています…"
+    verified: "確認しました"
+    verificationRequired: "確認が必要です"
+    waitAlert: "確認しています。しばらくお待ちください。"
+    error: "確認できませんでした。もう一度お試しください。"
+    expired: "確認の有効期限が切れました。もう一度お試しください。"
+    footer: '<a href="https://altcha.org/" tabindex="-1" target="_blank" rel="noopener" aria-label="ALTCHA（公式サイト）">ALTCHA</a> による保護'
+    ariaLinkLabel: "ALTCHA（公式サイト）"
+    loading: "読み込んでいます…"
+    reload: "再読み込み"
+    verify: "確認する"
+    cancel: "キャンセル"
+    enterCode: "コードを入力してください"
+    enterCodeAria: "聞こえたコードを入力してください。スペースキーで再生します。"
+    enterCodeFromImage: "続けるには、下の画像のコードを入力してください。"
+    getAudioChallenge: "コードを聞く"

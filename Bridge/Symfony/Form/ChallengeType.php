@@ -3,6 +3,7 @@
 namespace Omniguard\Bridge\Symfony\Form;
 
 use Omniguard\Bridge\Symfony\Validator\PassesChallenge;
+use Omniguard\Bridge\Symfony\WidgetLocalizer;
 use Omniguard\Registry;
 use Omniguard\WidgetPrinter;
 use Symfony\Component\Form\AbstractType;
@@ -33,6 +34,7 @@ final class ChallengeType extends AbstractType
         private readonly WidgetPrinter $printer,
         private readonly ?RequestStack $requests = null,
         private readonly ?string $gateway = null,
+        private readonly ?WidgetLocalizer $localizer = null,
     ) {
     }
 
@@ -51,7 +53,9 @@ final class ChallengeType extends AbstractType
 
     public function buildView(FormView $view, FormInterface $form, array $options): void
     {
-        $widget = $this->registry->challenge($options['gateway'])->widget($options['action']);
+        // In the visitor's language, with the bridge's texts (WidgetLocalizer).
+        $challenge = $this->registry->challenge($options['gateway']);
+        $widget = ($this->localizer?->localize($challenge) ?? $challenge)->widget($options['action']);
         $view->vars['omniguard_widget'] = $widget;
         $view->vars['omniguard_html'] = $this->printer->print($widget, $options['nonce']);
     }

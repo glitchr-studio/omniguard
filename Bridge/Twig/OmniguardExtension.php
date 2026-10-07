@@ -3,6 +3,7 @@
 namespace Omniguard\Bridge\Twig;
 
 use Omniguard\Model\Widget;
+use Omniguard\Bridge\Symfony\WidgetLocalizer;
 use Omniguard\Registry;
 use Omniguard\WidgetPrinter;
 use Twig\Extension\AbstractExtension;
@@ -28,6 +29,7 @@ final class OmniguardExtension extends AbstractExtension
         private readonly Registry $registry,
         private readonly WidgetPrinter $printer = new WidgetPrinter(),
         private readonly ?string $gateway = null,
+        private readonly ?WidgetLocalizer $localizer = null,
     ) {
     }
 
@@ -48,6 +50,8 @@ final class OmniguardExtension extends AbstractExtension
     {
         $gateway ??= $this->gateway ?? throw new \LogicException('No captcha named: pass its name, or set omniguard.challenge.gateway.');
 
-        return $this->registry->challenge($gateway)->widget($action);
+        $challenge = $this->registry->challenge($gateway);
+
+        return ($this->localizer?->localize($challenge) ?? $challenge)->widget($action);
     }
 }
