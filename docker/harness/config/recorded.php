@@ -25,7 +25,7 @@ return static function (string $method, string $url, array $options) use ($fixtu
     $path = (string) parse_url($url, \PHP_URL_PATH);
 
     if ('challenges.cloudflare.com' === $host) {
-        $dir = $fixtures('Omniguard\\Turnstile\\TurnstileGatewayFactory');
+        $dir = $fixtures('Omnishield\\Turnstile\\TurnstileGatewayFactory');
 
         return $json($dir.match (substr((string) ($body['secret'] ?? ''), 0, 2)) {
             '1x' => 'siteverify-testing-passes.json',
@@ -35,12 +35,12 @@ return static function (string $method, string $url, array $options) use ($fixtu
         });
     }
     if (str_ends_with($path, '/recaptcha/api/siteverify')) {
-        $dir = $fixtures('Omniguard\\Recaptcha\\RecaptchaGatewayFactory');
+        $dir = $fixtures('Omnishield\\Recaptcha\\RecaptchaGatewayFactory');
 
         return $json($dir.('6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe' === ($body['secret'] ?? null) ? 'siteverify-test-keys.json' : 'siteverify-unknown-secret.json'));
     }
     if ('rest.akismet.com' === $host) {
-        $dir = $fixtures('Omniguard\\Akismet\\AkismetGatewayFactory');
+        $dir = $fixtures('Omnishield\\Akismet\\AkismetGatewayFactory');
         $spam = str_contains(($body['comment_author'] ?? '').' '.($body['comment_content'] ?? ''), 'akismet-guaranteed-spam');
         $file = match (basename($path)) {
             'comment-check' => $spam ? 'comment-check-discard' : 'comment-check-ham',
@@ -52,7 +52,7 @@ return static function (string $method, string $url, array $options) use ($fixtu
         return new MockResponse($fixture['body'], ['response_headers' => $fixture['headers']]);
     }
     if (str_ends_with($host, 'stopforumspam.org')) {
-        $dir = $fixtures('Omniguard\\Stopforumspam\\StopforumspamGatewayFactory');
+        $dir = $fixtures('Omnishield\\Stopforumspam\\StopforumspamGatewayFactory');
 
         return $json($dir.match (true) {
             '185.220.101.1' === ($body['ip'] ?? null) => 'lookup-tor-exit.json',

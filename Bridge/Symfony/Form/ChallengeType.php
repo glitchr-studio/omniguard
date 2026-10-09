@@ -1,11 +1,11 @@
 <?php
 
-namespace Omniguard\Bridge\Symfony\Form;
+namespace Omnishield\Bridge\Symfony\Form;
 
-use Omniguard\Bridge\Symfony\Validator\PassesChallenge;
-use Omniguard\Bridge\Symfony\WidgetLocalizer;
-use Omniguard\Registry;
-use Omniguard\WidgetPrinter;
+use Omnishield\Bridge\Symfony\Validator\PassesChallenge;
+use Omnishield\Bridge\Symfony\WidgetLocalizer;
+use Omnishield\Registry;
+use Omnishield\WidgetPrinter;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
@@ -56,8 +56,8 @@ final class ChallengeType extends AbstractType
         // In the visitor's language, with the bridge's texts (WidgetLocalizer).
         $challenge = $this->registry->challenge($options['gateway']);
         $widget = ($this->localizer?->localize($challenge) ?? $challenge)->widget($options['action']);
-        $view->vars['omniguard_widget'] = $widget;
-        $view->vars['omniguard_html'] = $this->printer->print($widget, $options['nonce']);
+        $view->vars['omnishield_widget'] = $widget;
+        $view->vars['omnishield_html'] = $this->printer->print($widget, $options['nonce']);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -78,7 +78,7 @@ final class ChallengeType extends AbstractType
         $resolver->setAllowedTypes('action', ['null', 'string']);
         $resolver->setAllowedTypes('hostname', ['null', 'bool', 'string']);
         $resolver->setAllowedTypes('nonce', ['null', 'string']);
-        $resolver->setInfo('gateway', 'The configured captcha (omniguard.gateways.<name>); omniguard.challenge.gateway by default.');
+        $resolver->setInfo('gateway', 'The configured captcha (omnishield.gateways.<name>); omnishield.challenge.gateway by default.');
         $resolver->setInfo('action', 'What the form is for: signed into the token where the provider can, checked back.');
         $resolver->setInfo('hostname', 'The host the widget must have been shown on: a host, true for the request\'s, null to leave it.');
         $resolver->setInfo('nonce', 'The page\'s Content-Security-Policy nonce, for the widget\'s scripts.');
@@ -86,6 +86,6 @@ final class ChallengeType extends AbstractType
 
     public function getBlockPrefix(): string
     {
-        return 'omniguard_challenge';
+        return 'omnishield_challenge';
     }
 }

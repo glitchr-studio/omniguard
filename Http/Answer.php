@@ -1,9 +1,9 @@
 <?php
 
-namespace Omniguard\Http;
+namespace Omnishield\Http;
 
-use Omniguard\Exception\ProviderException;
-use Omniguard\Exception\UnreachableException;
+use Omnishield\Exception\ProviderException;
+use Omnishield\Exception\UnreachableException;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 

@@ -1,17 +1,17 @@
 <?php
 
-namespace Omniguard\Tests\Bridge;
+namespace Omnishield\Tests\Bridge;
 
-use Omniguard\Bridge\Symfony\Form\ChallengeType;
-use Omniguard\Bridge\Symfony\Validator\PassesChallenge;
-use Omniguard\Bridge\Symfony\Validator\PassesChallengeValidator;
-use Omniguard\Bridge\Twig\OmniguardExtension;
-use Omniguard\Registry;
-use Omniguard\Replay\InMemoryReplayStore;
-use Omniguard\Testing\FixedGateway;
-use Omniguard\Testing\FixedGatewayFactory;
-use Omniguard\Tests\StubFactory;
-use Omniguard\WidgetPrinter;
+use Omnishield\Bridge\Symfony\Form\ChallengeType;
+use Omnishield\Bridge\Symfony\Validator\PassesChallenge;
+use Omnishield\Bridge\Symfony\Validator\PassesChallengeValidator;
+use Omnishield\Bridge\Twig\OmnishieldExtension;
+use Omnishield\Registry;
+use Omnishield\Replay\InMemoryReplayStore;
+use Omnishield\Testing\FixedGateway;
+use Omnishield\Testing\FixedGatewayFactory;
+use Omnishield\Tests\StubFactory;
+use Omnishield\WidgetPrinter;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Twig\Extension\FormExtension;
 use Symfony\Bridge\Twig\Extension\TranslationExtension;
@@ -137,13 +137,13 @@ final class ChallengeFormTest extends TestCase
         $twig->addRuntimeLoader(new FactoryRuntimeLoader([FormRenderer::class => static fn () => new FormRenderer($engine)]));
         $twig->addExtension(new FormExtension());
         $twig->addExtension(new TranslationExtension());
-        $twig->addExtension(new OmniguardExtension($this->registry, new WidgetPrinter(), 'forms'));
+        $twig->addExtension(new OmnishieldExtension($this->registry, new WidgetPrinter(), 'forms'));
         $form = $factory->createNamedBuilder('contact')->add('captcha', ChallengeType::class, ['action' => 'contact'])->getForm();
 
         $html = $twig->createTemplate('{{ form_widget(form.captcha) }}')->render(['form' => $form->createView()]);
         self::assertSame('<script src="/stub.js" type="module"></script><stub-widget data-action="contact"></stub-widget>', trim($html));
 
-        $html = $twig->createTemplate('{{ omniguard_widget() }}|{{ omniguard_widget(action: "signup") }}|{{ omniguard_widget_data("tests").field }}')->render();
-        self::assertSame('<script src="/stub.js" type="module"></script><stub-widget></stub-widget>|<stub-widget data-action="signup"></stub-widget>|omniguard-token', $html);
+        $html = $twig->createTemplate('{{ omnishield_widget() }}|{{ omnishield_widget(action: "signup") }}|{{ omnishield_widget_data("tests").field }}')->render();
+        self::assertSame('<script src="/stub.js" type="module"></script><stub-widget></stub-widget>|<stub-widget data-action="signup"></stub-widget>|omnishield-token', $html);
     }
 }

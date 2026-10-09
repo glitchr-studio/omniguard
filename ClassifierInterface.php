@@ -1,9 +1,9 @@
 <?php
 
-namespace Omniguard;
+namespace Omnishield;
 
-use Omniguard\Model\Classification;
-use Omniguard\Model\Submission;
+use Omnishield\Model\Classification;
+use Omnishield\Model\Submission;
 
 /**
  * Is this content spam? What a visitor wrote - a comment, a message, a

@@ -1,6 +1,6 @@
 <?php
 
-namespace Omniguard\Replay;
+namespace Omnishield\Replay;
 
 /**
  * Spent tokens in this process's memory: for tests, a worker that handles

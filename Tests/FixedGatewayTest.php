@@ -1,13 +1,13 @@
 <?php
 
-namespace Omniguard\Tests;
+namespace Omnishield\Tests;
 
-use Omniguard\Model\Attempt;
-use Omniguard\Model\Identity;
-use Omniguard\Model\Submission;
-use Omniguard\Model\Verdict;
-use Omniguard\Testing\FixedGateway;
-use Omniguard\Testing\FixedGatewayFactory;
+use Omnishield\Model\Attempt;
+use Omnishield\Model\Identity;
+use Omnishield\Model\Submission;
+use Omnishield\Model\Verdict;
+use Omnishield\Testing\FixedGateway;
+use Omnishield\Testing\FixedGatewayFactory;
 use PHPUnit\Framework\TestCase;
 
 final class FixedGatewayTest extends TestCase
@@ -17,7 +17,7 @@ final class FixedGatewayTest extends TestCase
         $gateway = (new FixedGatewayFactory())->create();
         $widget = $gateway->widget('contact');
 
-        self::assertSame('<input type="hidden" name="omniguard-token" value="omniguard-fixed-token" data-omniguard-action="contact">', $widget->html());
+        self::assertSame('<input type="hidden" name="omnishield-token" value="omnishield-fixed-token" data-omnishield-action="contact">', $widget->html());
         self::assertTrue($gateway->verify(Attempt::fromPost([FixedGateway::FIELD => FixedGateway::TOKEN], $widget))->passed);
         self::assertTrue($gateway->verify(Attempt::fromPost([FixedGateway::FIELD => FixedGateway::TOKEN], $widget))->passed, 'and again: it remembers nothing');
         self::assertTrue($gateway->verify(new Attempt(''))->failedFor(Verdict::MISSING));

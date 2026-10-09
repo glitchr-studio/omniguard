@@ -1,6 +1,6 @@
 <?php
 
-namespace Omniguard\Model;
+namespace Omnishield\Model;
 
 /**
  * What a visitor submitted, as a classifier reads it: the text, who wrote

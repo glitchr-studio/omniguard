@@ -1,8 +1,8 @@
 <?php
 
-namespace Omniguard;
+namespace Omnishield;
 
-use Omniguard\Model\Capabilities;
+use Omnishield\Model\Capabilities;
 
 /**
  * One guard, configured: a captcha, a spam classifier, a list of known

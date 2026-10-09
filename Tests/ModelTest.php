@@ -1,18 +1,18 @@
 <?php
 
-namespace Omniguard\Tests;
+namespace Omnishield\Tests;
 
-use Omniguard\Config;
-use Omniguard\Model\Attempt;
-use Omniguard\Model\Capabilities;
-use Omniguard\Model\Classification;
-use Omniguard\Model\Identity;
-use Omniguard\Model\Label;
-use Omniguard\Model\Reputation;
-use Omniguard\Model\Submission;
-use Omniguard\Model\Verdict;
-use Omniguard\Model\Widget;
-use Omniguard\WidgetPrinter;
+use Omnishield\Config;
+use Omnishield\Model\Attempt;
+use Omnishield\Model\Capabilities;
+use Omnishield\Model\Classification;
+use Omnishield\Model\Identity;
+use Omnishield\Model\Label;
+use Omnishield\Model\Reputation;
+use Omnishield\Model\Submission;
+use Omnishield\Model\Verdict;
+use Omnishield\Model\Widget;
+use Omnishield\WidgetPrinter;
 use PHPUnit\Framework\TestCase;
 
 final class ModelTest extends TestCase

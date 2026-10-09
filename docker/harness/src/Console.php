@@ -1,18 +1,18 @@
 <?php
 
-namespace Omniguard\Harness;
+namespace Omnishield\Harness;
 
 use AltchaOrg\Altcha\Altcha;
 use AltchaOrg\Altcha\Challenge;
 use AltchaOrg\Altcha\Payload;
 use AltchaOrg\Altcha\SolveChallengeOptions;
-use Omniguard\Altcha\AltchaGatewayFactory;
-use Omniguard\ChallengeIssuerInterface;
-use Omniguard\Exception\InvalidConfigException;
-use Omniguard\Exception\OmniguardException;
-use Omniguard\Model\Attempt;
-use Omniguard\Model\Identity;
-use Omniguard\Model\Submission;
+use Omnishield\Altcha\AltchaGatewayFactory;
+use Omnishield\ChallengeIssuerInterface;
+use Omnishield\Exception\InvalidConfigException;
+use Omnishield\Exception\OmnishieldException;
+use Omnishield\Model\Attempt;
+use Omnishield\Model\Identity;
+use Omnishield\Model\Submission;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
@@ -35,7 +35,7 @@ final class Console
         $ip = new InputOption('ip', null, InputOption::VALUE_REQUIRED, 'The visitor\'s address');
         $action = new InputOption('action', 'a', InputOption::VALUE_REQUIRED, 'What the form is for');
 
-        $app = new Application('omniguard', '1.x');
+        $app = new Application('omnishield', '1.x');
         $app->addCommand(self::command('gateways', 'Which gateways are installed and configured, and what each answers', [$recorded], static fn ($in, $out, $g) => self::gateways($out, $g)));
         $app->addCommand(self::command('widget', 'What a page shows for a captcha: its parts (JSON) and its markup', [$gateway, $action, $recorded], static fn ($in, $out, $g) => self::widget($in, $out, $g)));
         $app->addCommand(self::command('solve', 'altcha: a challenge issued and solved here, as the widget would - the token to post (or to verify)', [$gateway, $action, $recorded], static fn ($in, $out, $g) => self::solve($in, $out, $g)));
@@ -65,7 +65,7 @@ final class Console
                 $out->writeln('<error>'.$e->getMessage().'</error>');
 
                 return Command::INVALID;
-            } catch (OmniguardException $e) {
+            } catch (OmnishieldException $e) {
                 $out->writeln('<error>'.$e::class.': '.$e->getMessage().'</error>');
 
                 return Command::FAILURE;

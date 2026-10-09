@@ -1,6 +1,6 @@
 <?php
 
-namespace Omniguard\Exception;
+namespace Omnishield\Exception;
 
 /**
  * The provider refused the site's key or secret: the configuration is wrong

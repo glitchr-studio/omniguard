@@ -1,6 +1,6 @@
 <?php
 
-namespace Omniguard\Model;
+namespace Omnishield\Model;
 
 /**
  * What a gateway is, said before it is asked anything: which of the three

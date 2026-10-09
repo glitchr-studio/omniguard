@@ -1,29 +1,29 @@
 <?php
 
-namespace Omniguard\Bridge\Symfony;
+namespace Omnishield\Bridge\Symfony;
 
-use Omniguard\Akismet\AkismetGatewayFactory;
-use Omniguard\Altcha\AltchaGatewayFactory;
-use Omniguard\Bridge\Symfony\Controller\ChallengeController;
-use Omniguard\Bridge\Symfony\EventListener\ScriptListener;
-use Omniguard\Bridge\Symfony\Form\ChallengeType;
-use Omniguard\Bridge\Symfony\Validator\PassesChallengeValidator;
-use Omniguard\Bridge\Twig\OmniguardExtension;
-use Omniguard\ChallengeInterface;
-use Omniguard\ClassifierInterface;
-use Omniguard\Disposable\DisposableGatewayFactory;
-use Omniguard\GatewayFactoryInterface;
-use Omniguard\GatewayInterface;
-use Omniguard\Recaptcha\RecaptchaGatewayFactory;
-use Omniguard\Registry;
-use Omniguard\Replay\CacheReplayStore;
-use Omniguard\Replay\InMemoryReplayStore;
-use Omniguard\Replay\ReplayStoreInterface;
-use Omniguard\ReputationInterface;
-use Omniguard\Stopforumspam\StopforumspamGatewayFactory;
-use Omniguard\Testing\FixedGatewayFactory;
-use Omniguard\Turnstile\TurnstileGatewayFactory;
-use Omniguard\WidgetPrinter;
+use Omnishield\Akismet\AkismetGatewayFactory;
+use Omnishield\Altcha\AltchaGatewayFactory;
+use Omnishield\Bridge\Symfony\Controller\ChallengeController;
+use Omnishield\Bridge\Symfony\EventListener\ScriptListener;
+use Omnishield\Bridge\Symfony\Form\ChallengeType;
+use Omnishield\Bridge\Symfony\Validator\PassesChallengeValidator;
+use Omnishield\Bridge\Twig\OmnishieldExtension;
+use Omnishield\ChallengeInterface;
+use Omnishield\ClassifierInterface;
+use Omnishield\Disposable\DisposableGatewayFactory;
+use Omnishield\GatewayFactoryInterface;
+use Omnishield\GatewayInterface;
+use Omnishield\Recaptcha\RecaptchaGatewayFactory;
+use Omnishield\Registry;
+use Omnishield\Replay\CacheReplayStore;
+use Omnishield\Replay\InMemoryReplayStore;
+use Omnishield\Replay\ReplayStoreInterface;
+use Omnishield\ReputationInterface;
+use Omnishield\Stopforumspam\StopforumspamGatewayFactory;
+use Omnishield\Testing\FixedGatewayFactory;
+use Omnishield\Turnstile\TurnstileGatewayFactory;
+use Omnishield\WidgetPrinter;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -40,27 +40,27 @@ use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_iterator;
 
 /**
- * Omniguard in a Symfony application: the gateway packages installed
- * (omniguard/altcha, turnstile, recaptcha, akismet, stopforumspam,
+ * Omnishield in a Symfony application: the gateway packages installed
+ * (omnishield/altcha, turnstile, recaptcha, akismet, stopforumspam,
  * disposable) registered, the gateways built from configuration and
  * injectable by their name, and what a form needs around a captcha:
  *
- *     omniguard:
+ *     omnishield:
  *         gateways:
  *             forms: { factory: altcha, options: { hmac_key: '%env(ALTCHA_HMAC_KEY)%' } }
  *             comments: { factory: akismet, options: { api_key: '%env(AKISMET_KEY)%', site: 'https://example.org' } }
  *             emails: { factory: disposable }
  *         challenge:
- *             gateway: forms            # the ChallengeType's, the constraint's and omniguard_widget()'s default
+ *             gateway: forms            # the ChallengeType's, the constraint's and omnishield_widget()'s default
  *             unreachable: reject       # or accept: a provider that does not answer lets the form through
- *         serve_scripts: true           # ALTCHA's widget served by the site (/omniguard/altcha/3.3.0/altcha.min.js), not a CDN
+ *         serve_scripts: true           # ALTCHA's widget served by the site (/omnishield/altcha/3.3.0/altcha.min.js), not a CDN
  *         replay:
  *             pool: cache.app           # where spent tokens are remembered; none: this process's memory
  *
  *     public function __construct(ChallengeInterface $forms, ClassifierInterface $comments, ReputationInterface $emails) {}
  *
  *     $builder->add('captcha', ChallengeType::class, ['action' => 'contact']);
- *     {{ omniguard_widget('forms', 'contact') }}
+ *     {{ omnishield_widget('forms', 'contact') }}
  *
  * Nothing is built, nor checked, when the container compiles: a gateway is
  * built the first time it is asked for, and an option left empty only shows
@@ -71,11 +71,11 @@ use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_it
  *
  * Each piece is registered only when its component is installed - Form,
  * Validator, Routing and HttpFoundation, Twig: none is required by
- * glitchr/omniguard.
+ * glitchr/omnishield.
  */
-final class OmniguardBundle extends AbstractBundle
+final class OmnishieldBundle extends AbstractBundle
 {
-    protected string $extensionAlias = 'omniguard';
+    protected string $extensionAlias = 'omnishield';
 
     /** The gateway packages this bundle knows, registered when installed; and the fixed gateway, for tests. */
     private const FACTORIES = [
@@ -116,7 +116,7 @@ final class OmniguardBundle extends AbstractBundle
                 ->end()
                 ->booleanNode('serve_scripts')
                     ->defaultTrue()
-                    ->info('Serve the widgets\' scripts the gateway packages ship from the site itself (ALTCHA\'s at /omniguard/altcha/<version>/altcha.min.js), and make it their gateways\' default: the page reaches nobody. false: the packages\' defaults (a CDN).')
+                    ->info('Serve the widgets\' scripts the gateway packages ship from the site itself (ALTCHA\'s at /omnishield/altcha/<version>/altcha.min.js), and make it their gateways\' default: the page reaches nobody. false: the packages\' defaults (a CDN).')
                 ->end()
                 ->arrayNode('replay')
                     ->addDefaultsIfNotSet()
@@ -132,8 +132,8 @@ final class OmniguardBundle extends AbstractBundle
     {
         if ($builder->hasExtension('twig')) {
             $builder->prependExtensionConfig('twig', array_filter([
-                'paths' => [__DIR__.'/templates' => 'Omniguard'],
-                'form_themes' => class_exists(AbstractType::class) ? ['@Omniguard/form.html.twig'] : null,
+                'paths' => [__DIR__.'/templates' => 'Omnishield'],
+                'form_themes' => class_exists(AbstractType::class) ? ['@Omnishield/form.html.twig'] : null,
             ]));
         }
     }
@@ -154,7 +154,7 @@ final class OmniguardBundle extends AbstractBundle
             }
         }
 
-        $builder->registerForAutoconfiguration(GatewayFactoryInterface::class)->addTag('omniguard.gateway_factory');
+        $builder->registerForAutoconfiguration(GatewayFactoryInterface::class)->addTag('omnishield.gateway_factory');
         $services = $container->services();
 
         if (null !== $config['replay']['service']) {
@@ -169,7 +169,7 @@ final class OmniguardBundle extends AbstractBundle
             if (!class_exists($factory) || !is_subclass_of($factory, GatewayFactoryInterface::class)) {
                 continue;
             }
-            $definition = $services->set($factory)->autowire()->tag('omniguard.gateway_factory');
+            $definition = $services->set($factory)->autowire()->tag('omnishield.gateway_factory');
             foreach ((new \ReflectionClass($factory))->getConstructor()?->getParameters() ?? [] as $parameter) {
                 if ('http' === $parameter->getName()) {
                     $definition->arg('$http', service('http_client')->nullOnInvalid());
@@ -178,11 +178,11 @@ final class OmniguardBundle extends AbstractBundle
         }
 
         $services->set(Registry::class)
-            ->args([tagged_iterator('omniguard.gateway_factory'), $config['gateways']])
+            ->args([tagged_iterator('omnishield.gateway_factory'), $config['gateways']])
             ->public();
 
         foreach (array_keys($config['gateways']) as $name) {
-            $id = 'omniguard.gateway.'.$name;
+            $id = 'omnishield.gateway.'.$name;
             $services->set($id, GatewayInterface::class)->factory([service(Registry::class), 'get'])->args([$name]);
             foreach ([GatewayInterface::class, ChallengeInterface::class, ClassifierInterface::class, ReputationInterface::class] as $type) {
                 $builder->registerAliasForArgument($id, $type, $name);
@@ -190,10 +190,10 @@ final class OmniguardBundle extends AbstractBundle
         }
 
         $default = $config['challenge']['gateway'] ?? array_key_first($config['gateways']);
-        $builder->setParameter('omniguard.challenge.gateway', $default);
+        $builder->setParameter('omnishield.challenge.gateway', $default);
         $services->set(WidgetPrinter::class)->tag('kernel.reset', ['method' => 'reset']);
 
-        // The widgets in the visitor's language: the request's locale, the domain "omniguard" (translations/).
+        // The widgets in the visitor's language: the request's locale, the domain "omnishield" (translations/).
         $services->set(WidgetLocalizer::class)
             ->args([service('translator')->nullOnInvalid(), service('request_stack')->nullOnInvalid()])
             ->public();
@@ -221,7 +221,7 @@ final class OmniguardBundle extends AbstractBundle
                 ->public();
         }
         if (class_exists(AbstractExtension::class)) {
-            $services->set(OmniguardExtension::class)
+            $services->set(OmnishieldExtension::class)
                 ->args([service(Registry::class), service(WidgetPrinter::class), $default, service(WidgetLocalizer::class)])
                 ->tag('twig.extension');
         }

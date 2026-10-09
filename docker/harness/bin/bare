@@ -2,7 +2,7 @@
 <?php
 
 /**
- * Omniguard in bare PHP: no bundle, no container, no console component. The
+ * Omnishield in bare PHP: no bundle, no container, no console component. The
  * registry is built by hand from the gateway packages installed, each
  * gateway says what it answers, then each is asked a whole question:
  *
@@ -19,12 +19,12 @@
  *
  * and the script lists what PHP loaded on the way.
  *
- *   docker compose run --rm omniguard bare           # the providers' recorded answers: nothing leaves the machine
- *   docker compose run --rm omniguard bare --live    # the providers themselves (Akismet only with AKISMET_API_KEY)
- *   docker compose run --rm omniguard bare --json    # the same, whole: every class and file loaded; exit 1 if one is a framework's
+ *   docker compose run --rm omnishield bare           # the providers' recorded answers: nothing leaves the machine
+ *   docker compose run --rm omnishield bare --live    # the providers themselves (Akismet only with AKISMET_API_KEY)
+ *   docker compose run --rm omnishield bare --json    # the same, whole: every class and file loaded; exit 1 if one is a framework's
  *
  * A gateway whose settings are not in the environment runs on the example
- * ones of config/gateways.php. OMNIGUARD_AUTOLOAD names another autoloader
+ * ones of config/gateways.php. OMNISHIELD_AUTOLOAD names another autoloader
  * than the harness's.
  */
 
@@ -32,20 +32,20 @@ use AltchaOrg\Altcha\Altcha;
 use AltchaOrg\Altcha\Challenge;
 use AltchaOrg\Altcha\Payload;
 use AltchaOrg\Altcha\SolveChallengeOptions;
-use Omniguard\Exception\OmniguardException;
-use Omniguard\Model\Attempt;
-use Omniguard\Model\Identity;
-use Omniguard\Model\Submission;
-use Omniguard\Registry;
-use Omniguard\Replay\InMemoryReplayStore;
-use Omniguard\Testing\FixedGateway;
-use Omniguard\Testing\FixedGatewayFactory;
+use Omnishield\Exception\OmnishieldException;
+use Omnishield\Model\Attempt;
+use Omnishield\Model\Identity;
+use Omnishield\Model\Submission;
+use Omnishield\Registry;
+use Omnishield\Replay\InMemoryReplayStore;
+use Omnishield\Testing\FixedGateway;
+use Omnishield\Testing\FixedGatewayFactory;
 
-require getenv('OMNIGUARD_AUTOLOAD') ?: '/harness/vendor/autoload.php';
+require getenv('OMNISHIELD_AUTOLOAD') ?: '/harness/vendor/autoload.php';
 
 $live = in_array('--live', $argv, true);
 $http = $live
-    ? Symfony\Component\HttpClient\HttpClient::create(['headers' => ['User-Agent' => 'omniguard-harness']])
+    ? Symfony\Component\HttpClient\HttpClient::create(['headers' => ['User-Agent' => 'omnishield-harness']])
     : new Symfony\Component\HttpClient\MockHttpClient(require __DIR__.'/../config/recorded.php');
 $replays = new InMemoryReplayStore();
 
@@ -80,14 +80,14 @@ $verdict = static fn ($v): array => ['passed' => $v->passed, 'reasons' => $v->re
 $ask = static function (callable $question) {
     try {
         return $question();
-    } catch (OmniguardException $e) {
+    } catch (OmnishieldException $e) {
         return ['error' => $e::class, 'message' => $e->getMessage()];
     }
 };
 
 if ($registry->has('altcha')) {
     $gateway = $registry->challenge('altcha');
-    $algorithm = Omniguard\Altcha\AltchaGatewayFactory::algorithm((string) ($registry->options('altcha')['algorithm'] ?? 'PBKDF2/SHA-256'));
+    $algorithm = Omnishield\Altcha\AltchaGatewayFactory::algorithm((string) ($registry->options('altcha')['algorithm'] ?? 'PBKDF2/SHA-256'));
     // What the widget does in the visitor's browser, done here by the ALTCHA library.
     $solve = static function (Challenge $challenge) use ($algorithm): array {
         $solution = (new Altcha())->solveChallenge(new SolveChallengeOptions(challenge: $challenge, algorithm: $algorithm));
@@ -173,7 +173,7 @@ if (in_array('--json', $argv, true)) {
 
 $yes = static fn (bool $v): string => $v ? 'yes' : 'no';
 $said = static fn (array $v): string => isset($v['error']) ? $v['error'].': '.$v['message'] : ($v['passed'] ? 'passed' : 'refused ('.implode(', ', $v['reasons']).($v['codes'] ? '; '.implode(', ', $v['codes']) : '').')');
-echo 'Omniguard in bare PHP: the registry built by hand, no bundle, no container; ', $live ? 'the providers themselves' : 'their recorded answers', ".\n\n";
+echo 'Omnishield in bare PHP: the registry built by hand, no bundle, no container; ', $live ? 'the providers themselves' : 'their recorded answers', ".\n\n";
 foreach ($report['gateways'] as $name => $g) {
     printf("  %-14s %s: answers %s; third party %s, cookies %s%s\n", $name, $g['title'], implode(', ', $g['questions']), $yes($g['thirdParty']), $yes($g['cookies']), $g['example'] ? ' (example settings)' : '');
 }

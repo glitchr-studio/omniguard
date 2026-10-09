@@ -1,6 +1,6 @@
 <?php
 
-namespace Omniguard\Model;
+namespace Omnishield\Model;
 
 /** Who submits a form, as a list reads them: an address, an e-mail, a name. Any may be missing. */
 final readonly class Identity

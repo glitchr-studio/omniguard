@@ -1,16 +1,16 @@
 <?php
 
-namespace Omniguard\Tests\Bridge;
+namespace Omnishield\Tests\Bridge;
 
-use Omniguard\Altcha\AltchaGateway;
-use Omniguard\Altcha\AltchaGatewayFactory;
-use Omniguard\Bridge\Symfony\Form\ChallengeType;
-use Omniguard\Bridge\Symfony\OmniguardBundle;
-use Omniguard\Bridge\Symfony\WidgetLocalizer;
-use Omniguard\Bridge\Twig\OmniguardExtension;
-use Omniguard\Registry;
-use Omniguard\Testing\FixedGateway;
-use Omniguard\WidgetPrinter;
+use Omnishield\Altcha\AltchaGateway;
+use Omnishield\Altcha\AltchaGatewayFactory;
+use Omnishield\Bridge\Symfony\Form\ChallengeType;
+use Omnishield\Bridge\Symfony\OmnishieldBundle;
+use Omnishield\Bridge\Symfony\WidgetLocalizer;
+use Omnishield\Bridge\Twig\OmnishieldExtension;
+use Omnishield\Registry;
+use Omnishield\Testing\FixedGateway;
+use Omnishield\WidgetPrinter;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -34,13 +34,13 @@ final class WidgetLocalizerTest extends TestCase
     protected function setUp(): void
     {
         if (!class_exists(AltchaGatewayFactory::class)) {
-            self::markTestSkipped('omniguard/altcha is not installed.');
+            self::markTestSkipped('omnishield/altcha is not installed.');
         }
     }
 
     private static function catalogue(string $language): string
     {
-        return (new OmniguardBundle())->getPath().'/translations/'.WidgetLocalizer::DOMAIN.'.'.$language.'.yaml';
+        return (new OmnishieldBundle())->getPath().'/translations/'.WidgetLocalizer::DOMAIN.'.'.$language.'.yaml';
     }
 
     private static function translator(): Translator
@@ -151,8 +151,8 @@ final class WidgetLocalizerTest extends TestCase
             ->getFormFactory();
 
         $view = $forms->createNamedBuilder('contact')->add('captcha', ChallengeType::class, ['action' => 'contact'])->getForm()->createView();
-        self::assertStringContainsString('"label":"Je ne suis pas un robot"', $view['captcha']->vars['omniguard_html']);
-        self::assertStringContainsString(' language="fr"', $view['captcha']->vars['omniguard_html']);
+        self::assertStringContainsString('"label":"Je ne suis pas un robot"', $view['captcha']->vars['omnishield_html']);
+        self::assertStringContainsString(' language="fr"', $view['captcha']->vars['omnishield_html']);
     }
 
     public function testTheBundlePrintsTheWidgetInTheVisitorsLanguage(): void
@@ -164,22 +164,22 @@ final class WidgetLocalizerTest extends TestCase
         $container->setAlias(HttpClientInterface::class, 'http_client');
         $container->register('request_stack', RequestStack::class)->setSynthetic(true)->setPublic(true);
         $container->register('translator', Translator::class)->setSynthetic(true)->setPublic(true);
-        $bundle = new OmniguardBundle();
+        $bundle = new OmnishieldBundle();
         $container->registerExtension($bundle->getContainerExtension());
-        $container->loadFromExtension('omniguard', ['gateways' => ['forms' => ['factory' => 'altcha', 'options' => ['hmac_key' => 'a-long-secret', 'cost' => 10]]]]);
+        $container->loadFromExtension('omnishield', ['gateways' => ['forms' => ['factory' => 'altcha', 'options' => ['hmac_key' => 'a-long-secret', 'cost' => 10]]]]);
         // What Twig is given, reached here as Twig reaches it.
         $container->addCompilerPass(new class implements CompilerPassInterface {
             public function process(ContainerBuilder $container): void
             {
-                $container->getDefinition(OmniguardExtension::class)->setPublic(true);
+                $container->getDefinition(OmnishieldExtension::class)->setPublic(true);
             }
         });
         $container->compile();
         $container->set('request_stack', self::requests('fr'));
         $container->set('translator', self::translator());
 
-        $extension = $container->get(OmniguardExtension::class);
-        self::assertInstanceOf(OmniguardExtension::class, $extension);
+        $extension = $container->get(OmnishieldExtension::class);
+        self::assertInstanceOf(OmnishieldExtension::class, $extension);
         $html = $extension->widget('forms', 'contact');
         self::assertStringContainsString(' language="fr"', $html);
         self::assertStringContainsString('"label":"Je ne suis pas un robot"', $html);

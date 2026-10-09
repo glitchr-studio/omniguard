@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Every gateway package: its slug (omniguard/<slug>, github.com/glitchr-studio/omniguard-<slug>),
+ * Every gateway package: its slug (omnishield/<slug>, github.com/glitchr-studio/omnishield-<slug>),
  * its tests' namespace and its factory class.
  */
 return [
-    'altcha' => ['Omniguard\\Altcha\\Tests\\', 'Omniguard\\Altcha\\AltchaGatewayFactory'],
-    'turnstile' => ['Omniguard\\Turnstile\\Tests\\', 'Omniguard\\Turnstile\\TurnstileGatewayFactory'],
-    'recaptcha' => ['Omniguard\\Recaptcha\\Tests\\', 'Omniguard\\Recaptcha\\RecaptchaGatewayFactory'],
-    'akismet' => ['Omniguard\\Akismet\\Tests\\', 'Omniguard\\Akismet\\AkismetGatewayFactory'],
-    'stopforumspam' => ['Omniguard\\Stopforumspam\\Tests\\', 'Omniguard\\Stopforumspam\\StopforumspamGatewayFactory'],
-    'disposable' => ['Omniguard\\Disposable\\Tests\\', 'Omniguard\\Disposable\\DisposableGatewayFactory'],
+    'altcha' => ['Omnishield\\Altcha\\Tests\\', 'Omnishield\\Altcha\\AltchaGatewayFactory'],
+    'turnstile' => ['Omnishield\\Turnstile\\Tests\\', 'Omnishield\\Turnstile\\TurnstileGatewayFactory'],
+    'recaptcha' => ['Omnishield\\Recaptcha\\Tests\\', 'Omnishield\\Recaptcha\\RecaptchaGatewayFactory'],
+    'akismet' => ['Omnishield\\Akismet\\Tests\\', 'Omnishield\\Akismet\\AkismetGatewayFactory'],
+    'stopforumspam' => ['Omnishield\\Stopforumspam\\Tests\\', 'Omnishield\\Stopforumspam\\StopforumspamGatewayFactory'],
+    'disposable' => ['Omnishield\\Disposable\\Tests\\', 'Omnishield\\Disposable\\DisposableGatewayFactory'],
 ];

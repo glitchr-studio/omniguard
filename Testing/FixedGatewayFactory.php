@@ -1,10 +1,10 @@
 <?php
 
-namespace Omniguard\Testing;
+namespace Omnishield\Testing;
 
-use Omniguard\Config;
-use Omniguard\GatewayFactory;
-use Omniguard\GatewayInterface;
+use Omnishield\Config;
+use Omnishield\GatewayFactory;
+use Omnishield\GatewayInterface;
 
 /**
  * The fixed gateway, by configuration - for an application's test
@@ -18,9 +18,9 @@ final class FixedGatewayFactory extends GatewayFactory
     protected function populate(Config $c): void
     {
         $c->defaults([
-            'omniguard.factory_name' => 'fixed',
-            'omniguard.factory_title' => 'Fixed',
-            'omniguard.required_options' => [],
+            'omnishield.factory_name' => 'fixed',
+            'omnishield.factory_title' => 'Fixed',
+            'omnishield.required_options' => [],
             'pass' => true,
         ]);
     }

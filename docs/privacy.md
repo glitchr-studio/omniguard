@@ -34,10 +34,10 @@ draws the line by purpose:
 - it advises asking the provider how it uses the data, and using **alternatives that need no
   consent** - since a captcha that waits for consent is skipped by whoever refuses.
 
-What follows for a site built on Omniguard - read as the CNIL's answer, not as legal advice:
+What follows for a site built on Omnishield - read as the CNIL's answer, not as legal advice:
 
 - **ALTCHA** reaches nobody and sets nothing: no consent to ask, nothing to declare but the
-  check itself. Its script is the site's own - served by the Symfony bridge from omniguard/altcha,
+  check itself. Its script is the site's own - served by the Symfony bridge from omnishield/altcha,
   or copied from it in PHP alone - and not even a CDN sees the visitor. It is the default for that
   reason.
 - **Turnstile** reaches Cloudflare: name it in the privacy policy; Cloudflare says it uses the
@@ -50,7 +50,7 @@ What follows for a site built on Omniguard - read as the CNIL's answer, not as l
   what is sent and why (protecting the forms), and keep StopForumSpam off unless the site wants
   it - its address goes to a third party at each check.
 
-## Asking for consent with Omniguard's widgets
+## Asking for consent with Omnishield's widgets
 
 ```php
 $widget = $registry->challenge('forms')->widget('contact');

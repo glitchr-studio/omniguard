@@ -1,4 +1,4 @@
-# The texts of the captchas' widgets (Omniguard\Bridge\Symfony\WidgetLocalizer): <gateway>.<text>.
+# The texts of the captchas' widgets (Omnishield\Bridge\Symfony\WidgetLocalizer): <gateway>.<text>.
 altcha:
     label: "I'm not a robot"
     verifying: "Verifying…"

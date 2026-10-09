@@ -1,6 +1,6 @@
 <?php
 
-namespace Omniguard;
+namespace Omnishield;
 
 /**
  * A captcha whose challenge the site itself issues - ALTCHA: the page asks

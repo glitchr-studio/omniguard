@@ -1,9 +1,9 @@
 <?php
 
-namespace Omniguard\Bridge\Symfony;
+namespace Omnishield\Bridge\Symfony;
 
-use Omniguard\ChallengeInterface;
-use Omniguard\LocalizableInterface;
+use Omnishield\ChallengeInterface;
+use Omnishield\LocalizableInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -11,14 +11,14 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  * A captcha's widget in the visitor's language: for a gateway that takes
  * texts (LocalizableInterface), the request's locale - or the language the
  * gateway was given - and the texts of the
- * bridge's translation domain "omniguard" - "<gateway>.<text>", French,
+ * bridge's translation domain "omnishield" - "<gateway>.<text>", French,
  * English, German and Japanese shipped, an application's own catalogue
  * over them -, the gateway's own `strings` option winning over both. A text
  * the catalogue does not hold is left to the widget.
  */
 final class WidgetLocalizer
 {
-    public const DOMAIN = 'omniguard';
+    public const DOMAIN = 'omnishield';
 
     public function __construct(
         private readonly ?TranslatorInterface $translator = null,

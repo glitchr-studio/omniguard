@@ -1,6 +1,6 @@
 <?php
 
-namespace Omniguard;
+namespace Omnishield;
 
 /** Builds a gateway from its options (a site key, a secret, a threshold...). */
 interface GatewayFactoryInterface

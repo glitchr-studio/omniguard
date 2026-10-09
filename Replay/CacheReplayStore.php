@@ -1,6 +1,6 @@
 <?php
 
-namespace Omniguard\Replay;
+namespace Omnishield\Replay;
 
 use Psr\Cache\CacheItemPoolInterface;
 
@@ -18,7 +18,7 @@ final class CacheReplayStore implements ReplayStoreInterface
 {
     public function __construct(
         private readonly CacheItemPoolInterface $pool,
-        private readonly string $prefix = 'omniguard.spent.',
+        private readonly string $prefix = 'omnishield.spent.',
     ) {
     }
 

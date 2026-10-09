@@ -1,14 +1,14 @@
 <?php
 
-namespace Omniguard\Exception;
+namespace Omnishield\Exception;
 
-use Omniguard\GatewayInterface;
+use Omnishield\GatewayInterface;
 
 /**
  * The gateway does not do that: a captcha asked whether content is spam, a
  * list that takes no report. Its Capabilities say so beforehand.
  */
-final class NotSupportedException extends \LogicException implements OmniguardException
+final class NotSupportedException extends \LogicException implements OmnishieldException
 {
     public static function question(GatewayInterface $gateway, string $name, string $question): self
     {

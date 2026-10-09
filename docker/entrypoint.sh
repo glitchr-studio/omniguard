@@ -4,7 +4,7 @@
 # "bare" for the script that uses the packages with no bundle, no container
 # and no console, "composer ..." or "sh" as they are.
 set -e
-php /omniguard/core/docker/harness/setup.php
+php /omnishield/core/docker/harness/setup.php
 cd /harness
 if [ ! -f vendor/autoload.php ]; then
     composer install --no-interaction --no-progress
@@ -13,7 +13,7 @@ elif [ composer.json -nt composer.lock ]; then
 fi
 case "${1:-}" in
     test) shift; exec vendor/bin/phpunit "$@" ;;
-    bare) shift; exec php /omniguard/core/docker/harness/bin/bare "$@" ;;
+    bare) shift; exec php /omnishield/core/docker/harness/bin/bare "$@" ;;
     composer|sh|php) exec "$@" ;;
-    *) exec php /omniguard/core/docker/harness/bin/omniguard "$@" ;;
+    *) exec php /omnishield/core/docker/harness/bin/omnishield "$@" ;;
 esac

@@ -1,6 +1,6 @@
 <?php
 
-namespace Omniguard\Model;
+namespace Omnishield\Model;
 
 /** What a classifier made of a submission. */
 enum Label: string

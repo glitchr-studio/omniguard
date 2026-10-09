@@ -1,14 +1,14 @@
 <?php
 
-namespace Omniguard\Bridge\Symfony\EventListener;
+namespace Omnishield\Bridge\Symfony\EventListener;
 
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 
 /**
  * The scripts a gateway package ships, served by the site itself - the
- * ALTCHA widget (omniguard/altcha's public/altcha.min.js) at
- * /omniguard/altcha/3.3.0/altcha.min.js - so that the page reaches nobody:
+ * ALTCHA widget (omnishield/altcha's public/altcha.min.js) at
+ * /omnishield/altcha/3.3.0/altcha.min.js - so that the page reaches nobody:
  * no CDN sees the visitor. Answered before routing, with no route to import
  * and no asset pipeline (neither Webpack Encore nor AssetMapper); its address
  * carries the version, so it is cached for a year.

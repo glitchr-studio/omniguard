@@ -1,14 +1,14 @@
 <?php
 
-namespace Omniguard\Tests;
+namespace Omnishield\Tests;
 
-use Omniguard\Bridge\Symfony\OmniguardBundle;
-use Omniguard\Registry;
+use Omnishield\Bridge\Symfony\OmnishieldBundle;
+use Omnishield\Registry;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
 /**
- * Omniguard outside Symfony: the harness's bare script (docker/harness/bin/bare)
+ * Omnishield outside Symfony: the harness's bare script (docker/harness/bin/bare)
  * run in a PHP process of its own - this one has loaded the bridge's tests -
  * builds the registry by hand and asks each gateway installed a whole
  * question, on the providers' recorded answers (nothing leaves the machine),
@@ -92,7 +92,7 @@ final class BareTest extends TestCase
         if (!class_exists(AbstractBundle::class)) {
             self::markTestSkipped('symfony/http-kernel is not installed.');
         }
-        [$status, $report] = self::php(['-r', 'require getenv("OMNIGUARD_AUTOLOAD"); class_exists($argv[1]) || exit(2); echo json_encode(["symbols" => [...get_declared_classes(), ...get_declared_interfaces(), ...get_declared_traits()], "files" => get_included_files()]);', '--', OmniguardBundle::class]);
+        [$status, $report] = self::php(['-r', 'require getenv("OMNISHIELD_AUTOLOAD"); class_exists($argv[1]) || exit(2); echo json_encode(["symbols" => [...get_declared_classes(), ...get_declared_interfaces(), ...get_declared_traits()], "files" => get_included_files()]);', '--', OmnishieldBundle::class]);
 
         self::assertSame(0, $status);
         $framework = self::framework($report);
@@ -108,7 +108,7 @@ final class BareTest extends TestCase
     private static function framework(array $report): array
     {
         // Composer includes every installed package's "files" (Twig's functions, here installed for the
-        // bridge's tests) before anything runs: loaded by the autoloader, not by Omniguard.
+        // bridge's tests) before anything runs: loaded by the autoloader, not by Omnishield.
         $eager = require \dirname((string) (new \ReflectionClass(\Composer\Autoload\ClassLoader::class))->getFileName()).'/autoload_files.php';
         $files = array_diff(array_map('realpath', $report['files']), array_map('realpath', array_values($eager)));
 
@@ -125,7 +125,7 @@ final class BareTest extends TestCase
     private static function php(array $arguments): array
     {
         $autoload = \dirname((string) (new \ReflectionClass(\Composer\Autoload\ClassLoader::class))->getFileName(), 2).'/autoload.php';
-        $process = proc_open([\PHP_BINARY, ...$arguments], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, null, ['OMNIGUARD_AUTOLOAD' => $autoload] + getenv());
+        $process = proc_open([\PHP_BINARY, ...$arguments], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, null, ['OMNISHIELD_AUTOLOAD' => $autoload] + getenv());
         self::assertIsResource($process);
         $out = (string) stream_get_contents($pipes[1]);
         $err = (string) stream_get_contents($pipes[2]);

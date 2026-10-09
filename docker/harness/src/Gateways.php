@@ -1,11 +1,11 @@
 <?php
 
-namespace Omniguard\Harness;
+namespace Omnishield\Harness;
 
-use Omniguard\GatewayFactoryInterface;
-use Omniguard\Registry;
-use Omniguard\Replay\InMemoryReplayStore;
-use Omniguard\Testing\FixedGatewayFactory;
+use Omnishield\GatewayFactoryInterface;
+use Omnishield\Registry;
+use Omnishield\Replay\InMemoryReplayStore;
+use Omnishield\Testing\FixedGatewayFactory;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -38,7 +38,7 @@ final class Gateways
     public function __construct(public readonly bool $live = false, bool $examples = true)
     {
         $this->config = require __DIR__.'/../config/gateways.php';
-        $this->http = $live ? HttpClient::create(['headers' => ['User-Agent' => 'omniguard-harness']]) : new MockHttpClient(require __DIR__.'/../config/recorded.php');
+        $this->http = $live ? HttpClient::create(['headers' => ['User-Agent' => 'omnishield-harness']]) : new MockHttpClient(require __DIR__.'/../config/recorded.php');
         $this->replays = new InMemoryReplayStore();
 
         $factories = ['fixed' => new FixedGatewayFactory()];

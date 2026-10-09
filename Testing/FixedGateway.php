@@ -1,19 +1,19 @@
 <?php
 
-namespace Omniguard\Testing;
+namespace Omnishield\Testing;
 
-use Omniguard\ChallengeInterface;
-use Omniguard\ClassifierInterface;
-use Omniguard\Model\Attempt;
-use Omniguard\Model\Capabilities;
-use Omniguard\Model\Classification;
-use Omniguard\Model\Identity;
-use Omniguard\Model\Label;
-use Omniguard\Model\Reputation;
-use Omniguard\Model\Submission;
-use Omniguard\Model\Verdict;
-use Omniguard\Model\Widget;
-use Omniguard\ReputationInterface;
+use Omnishield\ChallengeInterface;
+use Omnishield\ClassifierInterface;
+use Omnishield\Model\Attempt;
+use Omnishield\Model\Capabilities;
+use Omnishield\Model\Classification;
+use Omnishield\Model\Identity;
+use Omnishield\Model\Label;
+use Omnishield\Model\Reputation;
+use Omnishield\Model\Submission;
+use Omnishield\Model\Verdict;
+use Omnishield\Model\Widget;
+use Omnishield\ReputationInterface;
 
 /**
  * A gateway that always says the same, for an application's own tests: it
@@ -28,8 +28,8 @@ use Omniguard\ReputationInterface;
  */
 final class FixedGateway implements ChallengeInterface, ClassifierInterface, ReputationInterface
 {
-    public const FIELD = 'omniguard-token';
-    public const TOKEN = 'omniguard-fixed-token';
+    public const FIELD = 'omnishield-token';
+    public const TOKEN = 'omnishield-fixed-token';
 
     /** @var list<array{Submission, bool}> what report() was told, for the test to read */
     public array $reports = [];
@@ -65,7 +65,7 @@ final class FixedGateway implements ChallengeInterface, ClassifierInterface, Rep
 
     public function widget(?string $action = null): Widget
     {
-        return new Widget(self::FIELD, tag: 'input', attributes: ['type' => 'hidden', 'name' => self::FIELD, 'value' => self::TOKEN, 'data-omniguard-action' => $action ?? false], action: $action);
+        return new Widget(self::FIELD, tag: 'input', attributes: ['type' => 'hidden', 'name' => self::FIELD, 'value' => self::TOKEN, 'data-omnishield-action' => $action ?? false], action: $action);
     }
 
     public function verify(Attempt $attempt): Verdict

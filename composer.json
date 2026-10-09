@@ -1,7 +1,7 @@
 {
-    "name": "glitchr/omniguard",
+    "name": "glitchr/omnishield",
     "type": "library",
-    "description": "Omniguard: one contract for guarding a form - is this token valid (a captcha: ALTCHA, Turnstile, reCAPTCHA), is this content spam (Akismet), are this address, this e-mail, this name known for abuse (StopForumSpam, disposable e-mail domains) - whoever answers; and its Symfony bridge: a form field, a constraint, the ALTCHA challenge's route, a Twig function.",
+    "description": "Omnishield: one contract for guarding a form - is this token valid (a captcha: ALTCHA, Turnstile, reCAPTCHA), is this content spam (Akismet), are this address, this e-mail, this name known for abuse (StopForumSpam, disposable e-mail domains) - whoever answers; and its Symfony bridge: a form field, a constraint, the ALTCHA challenge's route, a Twig function.",
     "keywords": [
         "captcha",
         "spam",
@@ -12,9 +12,9 @@
         "akismet",
         "stopforumspam",
         "disposable-email",
-        "omniguard"
+        "omnishield"
     ],
-    "homepage": "https://github.com/glitchr-studio/omniguard",
+    "homepage": "https://github.com/glitchr-studio/omnishield",
     "license": "MIT",
     "authors": [
         {
@@ -43,25 +43,25 @@
         "twig/twig": "^3.0"
     },
     "suggest": {
-        "omniguard/altcha": "ALTCHA: a proof of work served and checked by the site itself - no third party, no cookie, no consent; the default",
-        "omniguard/turnstile": "Cloudflare Turnstile: a token checked by Cloudflare's siteverify",
-        "omniguard/recaptcha": "Google reCAPTCHA: v2 checkbox and invisible, v3 score, Enterprise assessments",
-        "omniguard/akismet": "Akismet: is this content spam - comment-check, submit-spam, submit-ham",
-        "omniguard/stopforumspam": "StopForumSpam: are this IP address, this e-mail, this name reported for abuse",
-        "omniguard/disposable": "Disposable e-mail domains: a free list shipped in the package, no call",
-        "psr/cache": "A spent token remembered in a PSR-6 pool (Omniguard\\Replay\\CacheReplayStore) rather than in this process's memory",
-        "symfony/config": "In a Symfony application: the configuration of Omniguard\\Bridge\\Symfony\\OmniguardBundle",
-        "symfony/dependency-injection": "In a Symfony application: the services of Omniguard\\Bridge\\Symfony\\OmniguardBundle",
-        "symfony/http-kernel": "In a Symfony application: Omniguard\\Bridge\\Symfony\\OmniguardBundle itself",
-        "symfony/form": "In a Symfony application: Omniguard\\Bridge\\Symfony\\Form\\ChallengeType",
+        "omnishield/altcha": "ALTCHA: a proof of work served and checked by the site itself - no third party, no cookie, no consent; the default",
+        "omnishield/turnstile": "Cloudflare Turnstile: a token checked by Cloudflare's siteverify",
+        "omnishield/recaptcha": "Google reCAPTCHA: v2 checkbox and invisible, v3 score, Enterprise assessments",
+        "omnishield/akismet": "Akismet: is this content spam - comment-check, submit-spam, submit-ham",
+        "omnishield/stopforumspam": "StopForumSpam: are this IP address, this e-mail, this name reported for abuse",
+        "omnishield/disposable": "Disposable e-mail domains: a free list shipped in the package, no call",
+        "psr/cache": "A spent token remembered in a PSR-6 pool (Omnishield\\Replay\\CacheReplayStore) rather than in this process's memory",
+        "symfony/config": "In a Symfony application: the configuration of Omnishield\\Bridge\\Symfony\\OmnishieldBundle",
+        "symfony/dependency-injection": "In a Symfony application: the services of Omnishield\\Bridge\\Symfony\\OmnishieldBundle",
+        "symfony/http-kernel": "In a Symfony application: Omnishield\\Bridge\\Symfony\\OmnishieldBundle itself",
+        "symfony/form": "In a Symfony application: Omnishield\\Bridge\\Symfony\\Form\\ChallengeType",
         "symfony/validator": "In a Symfony application: the PassesChallenge constraint",
         "symfony/routing": "In a Symfony application: the route that serves an ALTCHA challenge",
-        "symfony/translation": "In a Symfony application: the widgets' texts in the visitor's language (domain omniguard)",
-        "twig/twig": "With Twig: Omniguard\\Bridge\\Twig\\OmniguardExtension, the widget printed by omniguard_widget()"
+        "symfony/translation": "In a Symfony application: the widgets' texts in the visitor's language (domain omnishield)",
+        "twig/twig": "With Twig: Omnishield\\Bridge\\Twig\\OmnishieldExtension, the widget printed by omnishield_widget()"
     },
     "autoload": {
         "psr-4": {
-            "Omniguard\\": ""
+            "Omnishield\\": ""
         },
         "exclude-from-classmap": [
             "/Tests/",
@@ -70,7 +70,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Omniguard\\Tests\\": "Tests/"
+            "Omnishield\\Tests\\": "Tests/"
         }
     },
     "config": {

@@ -5,26 +5,26 @@ order: 4
 
 # Symfony
 
-Omniguard runs without a framework ([installation](installation.md)); in a Symfony application its
+Omnishield runs without a framework ([installation](installation.md)); in a Symfony application its
 bridge does the wiring. Its components - `symfony/config`, `symfony/dependency-injection`,
 `symfony/http-kernel`, and for the pieces below `symfony/form`, `symfony/validator`,
 `symfony/routing`, `symfony/http-foundation`, `twig/twig` - are not required by
-`glitchr/omniguard`: the application has them, each piece is registered only when its component
+`glitchr/omnishield`: the application has them, each piece is registered only when its component
 is installed, and nothing of them is loaded outside Symfony.
 
-Register `Omniguard\Bridge\Symfony\OmniguardBundle` (no Flex recipe):
+Register `Omnishield\Bridge\Symfony\OmnishieldBundle` (no Flex recipe):
 
 ```php
 // config/bundles.php
 return [
     // ...
-    Omniguard\Bridge\Symfony\OmniguardBundle::class => ['all' => true],
+    Omnishield\Bridge\Symfony\OmnishieldBundle::class => ['all' => true],
 ];
 ```
 
 ```yaml
-# config/packages/omniguard.yaml
-omniguard:
+# config/packages/omnishield.yaml
+omnishield:
     gateways:                                  # by name: a factory and its options
         forms:
             factory: altcha
@@ -44,12 +44,12 @@ omniguard:
         # service: App\Security\SpentTokens   # or a ReplayStoreInterface of yours, atomic
 
 when@test:
-    omniguard:
+    omnishield:
         gateways:
             forms: { factory: fixed }          # passes every token but an empty one; { pass: false } refuses all
 ```
 
-Every `omniguard/*` package installed registers its factory, **autowired**: the application's
+Every `omnishield/*` package installed registers its factory, **autowired**: the application's
 `http_client` is given to those that call a provider (none: one of their own), the store of spent
 tokens to ALTCHA. An application's own gateway - a class implementing `GatewayFactoryInterface` -
 is registered too, autoconfigured, and can be named as a `factory`. `fixed`
@@ -69,7 +69,7 @@ for, and an option left empty only shows then (`InvalidConfigException`).
 ## A captcha in a form
 
 ```php
-use Omniguard\Bridge\Symfony\Form\ChallengeType;
+use Omnishield\Bridge\Symfony\Form\ChallengeType;
 
 $builder
     ->add('message', TextareaType::class)
@@ -83,7 +83,7 @@ fields: the field reads it from the request when the form's own data does not ho
 
 | Option | Default | |
 |---|---|---|
-| `gateway` | `omniguard.challenge.gateway` | the configured captcha |
+| `gateway` | `omnishield.challenge.gateway` | the configured captcha |
 | `action` | `null` | what the form is for: signed into the token where the provider can, checked back |
 | `hostname` | `null` | the host the widget must have been shown on: a host, `true` for the request's |
 | `nonce` | `null` | the page's Content-Security-Policy nonce, for the widget's scripts |
@@ -101,7 +101,7 @@ The violation's cause is the `Verdict`: `$error->getCause()->getCause()->reasons
 The constraint works without the form type, on a property of a DTO:
 
 ```php
-use Omniguard\Bridge\Symfony\Validator\PassesChallenge;
+use Omnishield\Bridge\Symfony\Validator\PassesChallenge;
 
 final class ContactRequest
 {
@@ -121,27 +121,27 @@ reverse proxy, by the browser - would serve everyone the same challenge: let the
 fresh one instead.
 
 ```php
-// config/routes/omniguard.php
-use Omniguard\Bridge\Symfony\Controller\ChallengeController;
+// config/routes/omnishield.php
+use Omnishield\Bridge\Symfony\Controller\ChallengeController;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
 return static fn (RoutingConfigurator $routes) => $routes->import(ChallengeController::class, 'attribute');
 ```
 
 ```yaml
-omniguard:
+omnishield:
     gateways:
-        forms: { factory: altcha, options: { hmac_key: '%env(ALTCHA_HMAC_KEY)%', challenge_url: /omniguard/forms/challenge } }
+        forms: { factory: altcha, options: { hmac_key: '%env(ALTCHA_HMAC_KEY)%', challenge_url: /omnishield/forms/challenge } }
 ```
 
-`GET /omniguard/{gateway}/challenge?action=contact` (`omniguard_challenge`) answers a fresh
+`GET /omnishield/{gateway}/challenge?action=contact` (`omnishield_challenge`) answers a fresh
 challenge, `Cache-Control: no-store`; 404 for a gateway that issues none. The controller is a plain
 class: no `AbstractController`, nothing of FrameworkBundle.
 
 ## The widget's script, from the site
 
-omniguard/altcha ships its widget's script (`public/altcha.min.js`, the npm package's file, MIT).
-The bundle serves it at `/omniguard/altcha/3.3.0/altcha.min.js` - answered before routing, cached a
+omnishield/altcha ships its widget's script (`public/altcha.min.js`, the npm package's file, MIT).
+The bundle serves it at `/omnishield/altcha/3.3.0/altcha.min.js` - answered before routing, cached a
 year, with no route to import and no asset pipeline (`ScriptListener`) - and makes that the default
 `script` of every `altcha` gateway that names none: the page reaches nobody, `Widget::$origins` is
 empty. `serve_scripts: false` leaves the package's default (jsDelivr); a `script` option given is
@@ -150,10 +150,10 @@ the application's.
 ## The widget's language
 
 A gateway whose widget takes texts (`LocalizableInterface`: ALTCHA) is printed in the request's
-language, by the form type and by `omniguard_widget()` alike (`WidgetLocalizer`): its texts come
-from the translation domain `omniguard`, `<gateway>.<text>` - `altcha.label`, `altcha.verifying`,
+language, by the form type and by `omnishield_widget()` alike (`WidgetLocalizer`): its texts come
+from the translation domain `omnishield`, `<gateway>.<text>` - `altcha.label`, `altcha.verifying`,
 `altcha.verified`... -, shipped in French, English, German and Japanese
-(`Bridge/Symfony/translations/`). An application's own `translations/omniguard.<locale>.yaml`
+(`Bridge/Symfony/translations/`). An application's own `translations/omnishield.<locale>.yaml`
 overrides any text, or adds a language; a language nobody translated leaves the widget's own
 English. A gateway's `language` option fixes its language whatever the visitor's, its `strings`
 option wins over the catalogues. Without `symfony/translation`, nothing changes.
@@ -165,12 +165,12 @@ For a form that is not a Symfony form:
 ```twig
 <form method="post">
     {# ... #}
-    {{ omniguard_widget() }}                          {# the default captcha #}
-    {{ omniguard_widget('forms', 'contact') }}        {# a captcha, an action #}
-    {{ omniguard_widget('forms', nonce: csp_nonce) }}
+    {{ omnishield_widget() }}                          {# the default captcha #}
+    {{ omnishield_widget('forms', 'contact') }}        {# a captcha, an action #}
+    {{ omnishield_widget('forms', nonce: csp_nonce) }}
 </form>
 
-{% set widget = omniguard_widget_data('forms') %}    {# its parts: widget.field, widget.origins, widget.thirdParty #}
+{% set widget = omnishield_widget_data('forms') %}    {# its parts: widget.field, widget.origins, widget.thirdParty #}
 ```
 
 A provider's script is printed once per page, however many widgets and fields.

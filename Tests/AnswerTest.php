@@ -1,10 +1,10 @@
 <?php
 
-namespace Omniguard\Tests;
+namespace Omnishield\Tests;
 
-use Omniguard\Exception\ProviderException;
-use Omniguard\Exception\UnreachableException;
-use Omniguard\Http\Answer;
+use Omnishield\Exception\ProviderException;
+use Omnishield\Exception\UnreachableException;
+use Omnishield\Http\Answer;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;

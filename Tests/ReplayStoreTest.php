@@ -1,9 +1,9 @@
 <?php
 
-namespace Omniguard\Tests;
+namespace Omnishield\Tests;
 
-use Omniguard\Replay\CacheReplayStore;
-use Omniguard\Replay\InMemoryReplayStore;
+use Omnishield\Replay\CacheReplayStore;
+use Omnishield\Replay\InMemoryReplayStore;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 

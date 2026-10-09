@@ -1,6 +1,6 @@
 <?php
 
-namespace Omniguard\Replay;
+namespace Omnishield\Replay;
 
 /**
  * Where spent tokens are remembered, until they would have lapsed anyway: a

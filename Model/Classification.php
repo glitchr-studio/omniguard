@@ -1,6 +1,6 @@
 <?php
 
-namespace Omniguard\Model;
+namespace Omnishield\Model;
 
 /** What a classifier said of a submission: ham, spam or flagrant spam, and why. */
 final readonly class Classification

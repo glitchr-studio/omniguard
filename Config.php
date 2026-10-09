@@ -1,8 +1,8 @@
 <?php
 
-namespace Omniguard;
+namespace Omnishield;
 
-use Omniguard\Exception\InvalidConfigException;
+use Omnishield\Exception\InvalidConfigException;
 
 /**
  * A gateway's configuration while its factory builds it: the options given,
@@ -29,7 +29,7 @@ final class Config extends \ArrayObject
     {
         $missing = array_values(array_filter($keys, fn (string $key) => !isset($this[$key]) || '' === $this[$key] || [] === $this[$key]));
         if ($missing) {
-            throw new InvalidConfigException(\sprintf('The "%s" gateway needs: %s.', $this['omniguard.factory_name'] ?? '?', implode(', ', $missing)));
+            throw new InvalidConfigException(\sprintf('The "%s" gateway needs: %s.', $this['omnishield.factory_name'] ?? '?', implode(', ', $missing)));
         }
     }
 

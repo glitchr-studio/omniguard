@@ -1,12 +1,12 @@
 <?php
 
-namespace Omniguard\Tests;
+namespace Omnishield\Tests;
 
-use Omniguard\ChallengeInterface;
-use Omniguard\Exception\InvalidConfigException;
-use Omniguard\Exception\NotSupportedException;
-use Omniguard\Registry;
-use Omniguard\Testing\FixedGatewayFactory;
+use Omnishield\ChallengeInterface;
+use Omnishield\Exception\InvalidConfigException;
+use Omnishield\Exception\NotSupportedException;
+use Omnishield\Registry;
+use Omnishield\Testing\FixedGatewayFactory;
 use PHPUnit\Framework\TestCase;
 
 final class RegistryTest extends TestCase

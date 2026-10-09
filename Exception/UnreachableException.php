@@ -1,6 +1,6 @@
 <?php
 
-namespace Omniguard\Exception;
+namespace Omnishield\Exception;
 
 /**
  * The provider did not answer: no connection, a timeout, a server error, a

@@ -1,11 +1,11 @@
 <?php
 
-namespace Omniguard\Bridge\Symfony\Validator;
+namespace Omnishield\Bridge\Symfony\Validator;
 
-use Omniguard\Exception\UnreachableException;
-use Omniguard\Model\Attempt;
-use Omniguard\Model\Verdict;
-use Omniguard\Registry;
+use Omnishield\Exception\UnreachableException;
+use Omnishield\Model\Attempt;
+use Omnishield\Model\Verdict;
+use Omnishield\Registry;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
@@ -46,7 +46,7 @@ final class PassesChallengeValidator extends ConstraintValidator
 
         $request = $this->requests?->getCurrentRequest();
         $hostname = true === $constraint->hostname ? $request?->getHost() : (\is_string($constraint->hostname) ? $constraint->hostname : null);
-        $gateway = $constraint->gateway ?? $this->gateway ?? throw new \LogicException('No captcha named: set omniguard.challenge.gateway, or the constraint\'s gateway.');
+        $gateway = $constraint->gateway ?? $this->gateway ?? throw new \LogicException('No captcha named: set omnishield.challenge.gateway, or the constraint\'s gateway.');
 
         try {
             $verdict = $this->registry->challenge($gateway)->verify(new Attempt($token, $request?->getClientIp(), $constraint->action, $hostname));

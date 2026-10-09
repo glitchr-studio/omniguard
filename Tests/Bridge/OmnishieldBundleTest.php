@@ -1,22 +1,22 @@
 <?php
 
-namespace Omniguard\Tests\Bridge;
+namespace Omnishield\Tests\Bridge;
 
-use Omniguard\Bridge\Symfony\Controller\ChallengeController;
-use Omniguard\Bridge\Symfony\EventListener\ScriptListener;
-use Omniguard\Bridge\Symfony\Form\ChallengeType;
-use Omniguard\Bridge\Symfony\OmniguardBundle;
-use Omniguard\Bridge\Symfony\Validator\PassesChallengeValidator;
-use Omniguard\Bridge\Twig\OmniguardExtension;
-use Omniguard\ChallengeInterface;
-use Omniguard\GatewayInterface;
-use Omniguard\Registry;
-use Omniguard\Replay\CacheReplayStore;
-use Omniguard\Replay\InMemoryReplayStore;
-use Omniguard\Replay\ReplayStoreInterface;
-use Omniguard\ReputationInterface;
-use Omniguard\Testing\FixedGateway;
-use Omniguard\Tests\StubFactory;
+use Omnishield\Bridge\Symfony\Controller\ChallengeController;
+use Omnishield\Bridge\Symfony\EventListener\ScriptListener;
+use Omnishield\Bridge\Symfony\Form\ChallengeType;
+use Omnishield\Bridge\Symfony\OmnishieldBundle;
+use Omnishield\Bridge\Symfony\Validator\PassesChallengeValidator;
+use Omnishield\Bridge\Twig\OmnishieldExtension;
+use Omnishield\ChallengeInterface;
+use Omnishield\GatewayInterface;
+use Omnishield\Registry;
+use Omnishield\Replay\CacheReplayStore;
+use Omnishield\Replay\InMemoryReplayStore;
+use Omnishield\Replay\ReplayStoreInterface;
+use Omnishield\ReputationInterface;
+use Omnishield\Testing\FixedGateway;
+use Omnishield\Tests\StubFactory;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -26,7 +26,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-final class OmniguardBundleTest extends TestCase
+final class OmnishieldBundleTest extends TestCase
 {
     /** @param array<string, mixed> $config */
     private function container(array $config, bool $pool = true, bool $contact = false, bool $keepUnused = false): ContainerBuilder
@@ -43,9 +43,9 @@ final class OmniguardBundleTest extends TestCase
         if ($contact) {
             $container->register(Contact::class)->setAutowired(true)->setPublic(true);
         }
-        $bundle = new OmniguardBundle();
+        $bundle = new OmnishieldBundle();
         $container->registerExtension($bundle->getContainerExtension());
-        $container->loadFromExtension('omniguard', $config);
+        $container->loadFromExtension('omnishield', $config);
         if ($keepUnused) {
             // What the bundle registers, before unused private services are removed.
             $container->getCompilerPassConfig()->setRemovingPasses([]);
@@ -72,7 +72,7 @@ final class OmniguardBundleTest extends TestCase
         self::assertSame($registry->get('lists'), $contact->lists);
         self::assertSame($registry->get('lists'), $contact->gateway);
         self::assertInstanceOf(FixedGateway::class, $contact->lists);
-        self::assertSame('forms', $container->getParameter('omniguard.challenge.gateway'), 'the first gateway is the default captcha');
+        self::assertSame('forms', $container->getParameter('omnishield.challenge.gateway'), 'the first gateway is the default captcha');
     }
 
     public function testAFactoryIsGivenTheApplicationsStoreAndClient(): void
@@ -92,8 +92,8 @@ final class OmniguardBundleTest extends TestCase
         $container = new ContainerBuilder();
         $container->register('app.spent_tokens', AtomicStore::class);
         $container->register(StubFactory::class)->setAutoconfigured(true)->setAutowired(true);
-        $container->registerExtension((new OmniguardBundle())->getContainerExtension());
-        $container->loadFromExtension('omniguard', ['gateways' => ['forms' => ['factory' => 'stub', 'options' => ['secret' => 's']]], 'replay' => ['service' => 'app.spent_tokens']]);
+        $container->registerExtension((new OmnishieldBundle())->getContainerExtension());
+        $container->loadFromExtension('omnishield', ['gateways' => ['forms' => ['factory' => 'stub', 'options' => ['secret' => 's']]], 'replay' => ['service' => 'app.spent_tokens']]);
         $container->compile();
         self::assertInstanceOf(AtomicStore::class, $container->get(Registry::class)->get('forms')->replays);
     }
@@ -102,7 +102,7 @@ final class OmniguardBundleTest extends TestCase
     {
         $container = $this->container(['gateways' => ['forms' => ['factory' => 'stub', 'options' => ['secret' => 's']]], 'challenge' => ['unreachable' => 'accept']], keepUnused: true);
 
-        foreach ([ChallengeType::class => 'form.type', PassesChallengeValidator::class => 'validator.constraint_validator', ChallengeController::class => 'controller.service_arguments', OmniguardExtension::class => 'twig.extension'] as $id => $tag) {
+        foreach ([ChallengeType::class => 'form.type', PassesChallengeValidator::class => 'validator.constraint_validator', ChallengeController::class => 'controller.service_arguments', OmnishieldExtension::class => 'twig.extension'] as $id => $tag) {
             self::assertTrue($container->getDefinition($id)->hasTag($tag), $id);
         }
         self::assertTrue($container->getDefinition(PassesChallengeValidator::class)->getArgument(3), 'unreachable: accept');
@@ -113,28 +113,28 @@ final class OmniguardBundleTest extends TestCase
         $container = $this->container(['gateways' => ['forms' => ['factory' => 'stub', 'options' => ['secret' => 's']], 'lists' => ['factory' => 'fixed']]]);
         $controller = $container->get(ChallengeController::class);
 
-        $response = $controller('forms', Request::create('/omniguard/forms/challenge?action=contact'));
+        $response = $controller('forms', Request::create('/omnishield/forms/challenge?action=contact'));
         self::assertSame(['token' => 'good-1', 'action' => 'contact'], json_decode((string) $response->getContent(), true));
         self::assertStringContainsString('no-store', (string) $response->headers->get('Cache-Control'));
         self::assertSame('good-2', json_decode((string) $controller('forms', Request::create('/'))->getContent(), true)['token'], 'never the same');
 
         $this->expectException(NotFoundHttpException::class);
-        $controller('lists', Request::create('/omniguard/lists/challenge'));
+        $controller('lists', Request::create('/omnishield/lists/challenge'));
     }
 
     public function testTheAltchaWidgetIsServedByTheSiteAndReachesNobody(): void
     {
-        if (!class_exists(\Omniguard\Altcha\AltchaGatewayFactory::class)) {
-            self::markTestSkipped('omniguard/altcha is not installed.');
+        if (!class_exists(\Omnishield\Altcha\AltchaGatewayFactory::class)) {
+            self::markTestSkipped('omnishield/altcha is not installed.');
         }
-        $altcha = \Omniguard\Altcha\AltchaGatewayFactory::class;
+        $altcha = \Omnishield\Altcha\AltchaGatewayFactory::class;
         $container = $this->container(['gateways' => ['forms' => ['factory' => 'altcha', 'options' => ['hmac_key' => 'a-long-secret', 'cost' => 10]]]]);
 
         $widget = $container->get(Registry::class)->challenge('forms')->widget('contact');
         self::assertSame($altcha::SCRIPT_PATH, $widget->script, 'the site\'s own address');
         self::assertSame([], $widget->origins);
         self::assertFalse($widget->reachesOthers(), 'nobody else is reached: no consent to ask');
-        self::assertStringStartsWith('<script src="/omniguard/altcha/', $widget->html());
+        self::assertStringStartsWith('<script src="/omnishield/altcha/', $widget->html());
 
         // The address answers with the package's file, cached for a year; nothing else is touched.
         $listener = $container->get(ScriptListener::class);
@@ -163,12 +163,12 @@ final class OmniguardBundleTest extends TestCase
     {
         $container = new ContainerBuilder();
         $container->registerExtension(new TwigConfigCatcher());
-        $bundle = new OmniguardBundle();
+        $bundle = new OmnishieldBundle();
         $container->registerExtension($bundle->getContainerExtension());
         $bundle->getContainerExtension()->prepend($container);
 
         $twig = $container->getExtensionConfig('twig')[0];
-        self::assertSame(['@Omniguard/form.html.twig'], $twig['form_themes']);
+        self::assertSame(['@Omnishield/form.html.twig'], $twig['form_themes']);
         self::assertFileExists(array_key_first($twig['paths']).'/form.html.twig');
     }
 }

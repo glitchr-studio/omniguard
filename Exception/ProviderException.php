@@ -1,6 +1,6 @@
 <?php
 
-namespace Omniguard\Exception;
+namespace Omnishield\Exception;
 
 /**
  * The provider answered with an error rather than a verdict: a request it
@@ -8,7 +8,7 @@ namespace Omniguard\Exception;
  * not hold is a Verdict that did not pass - and not a silence either
  * (UnreachableException).
  */
-class ProviderException extends \RuntimeException implements OmniguardException
+class ProviderException extends \RuntimeException implements OmnishieldException
 {
     public function __construct(
         public readonly string $provider,

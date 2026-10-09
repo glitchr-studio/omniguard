@@ -1,9 +1,9 @@
 <?php
 
-namespace Omniguard\Bridge\Symfony\Controller;
+namespace Omnishield\Bridge\Symfony\Controller;
 
-use Omniguard\ChallengeIssuerInterface;
-use Omniguard\Registry;
+use Omnishield\ChallengeIssuerInterface;
+use Omnishield\Registry;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -15,10 +15,10 @@ use Symfony\Component\Routing\Attribute\Route;
  * A plain controller - no AbstractController, nothing of FrameworkBundle -
  * imported by the application:
  *
- *     // config/routes/omniguard.php
+ *     // config/routes/omnishield.php
  *     return static fn (RoutingConfigurator $routes) => $routes->import(ChallengeController::class, 'attribute');
  *
- *     omniguard.gateways.forms.options.challenge_url: /omniguard/forms/challenge
+ *     omnishield.gateways.forms.options.challenge_url: /omnishield/forms/challenge
  */
 final class ChallengeController
 {
@@ -26,7 +26,7 @@ final class ChallengeController
     {
     }
 
-    #[Route('/omniguard/{gateway}/challenge', name: 'omniguard_challenge', requirements: ['gateway' => '[A-Za-z0-9_.-]+'], methods: ['GET'])]
+    #[Route('/omnishield/{gateway}/challenge', name: 'omnishield_challenge', requirements: ['gateway' => '[A-Za-z0-9_.-]+'], methods: ['GET'])]
     public function __invoke(string $gateway, Request $request): JsonResponse
     {
         $issuer = $this->registry->has($gateway) ? $this->registry->get($gateway) : null;

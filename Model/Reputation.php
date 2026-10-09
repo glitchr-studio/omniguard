@@ -1,6 +1,6 @@
 <?php
 
-namespace Omniguard\Model;
+namespace Omnishield\Model;
 
 /**
  * What a list knows of an identity: known for abuse or not, how often, how

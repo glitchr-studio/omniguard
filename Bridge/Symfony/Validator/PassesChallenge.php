@@ -1,6 +1,6 @@
 <?php
 
-namespace Omniguard\Bridge\Symfony\Validator;
+namespace Omnishield\Bridge\Symfony\Validator;
 
 use Symfony\Component\Validator\Constraint;
 
@@ -29,10 +29,10 @@ final class PassesChallenge extends Constraint
     public string $unreachableMessage = 'The check that you are not a robot could not be done just now. Please try again in a moment.';
 
     /**
-     * @param string|null      $gateway     the configured captcha; omniguard.challenge.gateway when null
+     * @param string|null      $gateway     the configured captcha; omnishield.challenge.gateway when null
      * @param string|null      $action      the action the token must have been made for
      * @param string|bool|null $hostname    the host the widget must have been shown on; true: the request's
-     * @param bool|null        $unreachable true lets the value through when the provider does not answer; null: omniguard.challenge.unreachable
+     * @param bool|null        $unreachable true lets the value through when the provider does not answer; null: omnishield.challenge.unreachable
      */
     public function __construct(
         public ?string $gateway = null,

@@ -1,9 +1,9 @@
 <?php
 
-namespace Omniguard;
+namespace Omnishield;
 
-use Omniguard\Exception\InvalidConfigException;
-use Omniguard\Exception\NotSupportedException;
+use Omnishield\Exception\InvalidConfigException;
+use Omnishield\Exception\NotSupportedException;
 
 /**
  * The application's gateways by name, each built once from its factory and

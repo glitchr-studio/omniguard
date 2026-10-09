@@ -1,9 +1,9 @@
 <?php
 
-namespace Omniguard;
+namespace Omnishield;
 
-use Omniguard\Model\Identity;
-use Omniguard\Model\Reputation;
+use Omnishield\Model\Identity;
+use Omnishield\Model\Reputation;
 
 /**
  * Are this IP address, this e-mail, this name known for abuse? A list,

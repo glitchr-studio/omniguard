@@ -1,6 +1,6 @@
 <?php
 
-namespace Omniguard;
+namespace Omnishield;
 
 /**
  * A captcha whose widget shows texts the site can give it - in the
@@ -12,7 +12,7 @@ namespace Omniguard;
  *
  * The Symfony bridge does it for every widget it prints: the gateway's own
  * language if it was given one, else the request's; the texts of its
- * translation domain "omniguard" (<gateway>.<text>) in that language; the
+ * translation domain "omnishield" (<gateway>.<text>) in that language; the
  * gateway's own `strings` option over them.
  */
 interface LocalizableInterface extends ChallengeInterface

@@ -1,11 +1,11 @@
 <?php
 
-namespace Omniguard;
+namespace Omnishield;
 
 /**
  * The Omnibus way, at its simplest: a gateway's factory fills a Config - its
- * name ("omniguard.factory_name"), its title ("omniguard.factory_title"),
- * the options it needs ("omniguard.required_options") and the defaults of
+ * name ("omnishield.factory_name"), its title ("omnishield.factory_title"),
+ * the options it needs ("omnishield.required_options") and the defaults of
  * the others - then builds the gateway from it.
  *
  * Nothing here calls anything: a factory whose provider is reached over HTTP
@@ -17,13 +17,13 @@ abstract class GatewayFactory implements GatewayFactoryInterface
 {
     public function getName(): string
     {
-        return $this->createConfig()['omniguard.factory_name'];
+        return $this->createConfig()['omnishield.factory_name'];
     }
 
     public function create(array $options = []): GatewayInterface
     {
         $config = $this->createConfig($options);
-        $config->validateNotEmpty($config->get('omniguard.required_options', []));
+        $config->validateNotEmpty($config->get('omnishield.required_options', []));
 
         return $this->build($config);
     }

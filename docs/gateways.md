@@ -93,7 +93,7 @@ the people who submit a form, never about every visitor.
 
 ## Writing a gateway
 
-A package `omniguard/<provider>`: a factory extending `Omniguard\GatewayFactory` that fills a
+A package `omnishield/<provider>`: a factory extending `Omnishield\GatewayFactory` that fills a
 `Config` - its name, title, the options it needs and their defaults - and builds the gateway, a
 class implementing the contract of its question:
 
@@ -108,9 +108,9 @@ final class HcaptchaGatewayFactory extends GatewayFactory
     protected function populate(Config $c): void
     {
         $c->defaults([
-            'omniguard.factory_name' => 'hcaptcha',
-            'omniguard.factory_title' => 'hCaptcha',
-            'omniguard.required_options' => ['site_key', 'secret'],
+            'omnishield.factory_name' => 'hcaptcha',
+            'omnishield.factory_title' => 'hCaptcha',
+            'omnishield.required_options' => ['site_key', 'secret'],
         ]);
     }
 
@@ -121,7 +121,7 @@ final class HcaptchaGatewayFactory extends GatewayFactory
 }
 ```
 
-Call the provider through `Omniguard\Http\Answer::send()`: no answer, a server error or a quota
+Call the provider through `Omnishield\Http\Answer::send()`: no answer, a server error or a quota
 exceeded become an `UnreachableException`, and the rest comes back for the gateway to read. Turn
 a refusal into a `Verdict`, a refused key into an `InvalidKeyException`, and leave out what the
 provider's documentation does not show. Test it on `MockHttpClient` with answers recorded from the

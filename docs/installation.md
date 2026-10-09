@@ -6,15 +6,15 @@ order: 1
 # Installation and a first form
 
 ```sh
-composer require glitchr/omniguard omniguard/altcha        # a captcha the site issues and checks itself: no key, no third party
-composer require omniguard/disposable                      # disposable e-mail domains: a list, no call
-composer require omniguard/turnstile omniguard/recaptcha   # Cloudflare's, Google's captcha
-composer require omniguard/akismet omniguard/stopforumspam # a spam classifier, a list of reported abusers
+composer require glitchr/omnishield omnishield/altcha        # a captcha the site issues and checks itself: no key, no third party
+composer require omnishield/disposable                      # disposable e-mail domains: a list, no call
+composer require omnishield/turnstile omnishield/recaptcha   # Cloudflare's, Google's captcha
+composer require omnishield/akismet omnishield/stopforumspam # a spam classifier, a list of reported abusers
 ```
 
 PHP 8.2 or later.
 
-Omniguard needs no framework. The core requires PHP and `symfony/http-client-contracts` - the
+Omnishield needs no framework. The core requires PHP and `symfony/http-client-contracts` - the
 HTTP client's interfaces, no client; a gateway that calls a provider requires
 `symfony/http-client` (a library, not a framework) and takes the application's client when it is
 given one. It runs the same in plain PHP, in a worker, in Laravel or Slim, and in Symfony, where a
@@ -27,14 +27,14 @@ bundle does the wiring ([Symfony](symfony.md)).
 
 require __DIR__.'/vendor/autoload.php';
 
-use Omniguard\Altcha\AltchaGatewayFactory;
-use Omniguard\Disposable\DisposableGatewayFactory;
-use Omniguard\Model\Attempt;
-use Omniguard\Model\Identity;
-use Omniguard\Registry;
-use Omniguard\Replay\InMemoryReplayStore;
-use Omniguard\Stopforumspam\StopforumspamGatewayFactory;
-use Omniguard\Turnstile\TurnstileGatewayFactory;
+use Omnishield\Altcha\AltchaGatewayFactory;
+use Omnishield\Disposable\DisposableGatewayFactory;
+use Omnishield\Model\Attempt;
+use Omnishield\Model\Identity;
+use Omnishield\Registry;
+use Omnishield\Replay\InMemoryReplayStore;
+use Omnishield\Stopforumspam\StopforumspamGatewayFactory;
+use Omnishield\Turnstile\TurnstileGatewayFactory;
 
 $registry = new Registry([new AltchaGatewayFactory(new InMemoryReplayStore()), new TurnstileGatewayFactory(), new StopforumspamGatewayFactory(), new DisposableGatewayFactory()], [
     'forms' => ['factory' => 'altcha', 'options' => ['hmac_key' => 'a-long-random-secret-of-the-site']],
@@ -93,7 +93,7 @@ That is all there is to it:
   `reputation()` give a gateway as the contract that asks it ([gateways](gateways.md)).
 
 No class of a framework is loaded on the way - a test of this package checks it in a process of
-its own (`Tests/BareTest.php`), and so does `docker compose run --rm omniguard bare`
+its own (`Tests/BareTest.php`), and so does `docker compose run --rm omnishield bare`
 ([harness](harness.md)).
 
 ## What the application does around a gateway
@@ -106,7 +106,7 @@ its own (`Tests/BareTest.php`), and so does `docker compose run --rm omniguard b
 3. **Ask the lists** about the visitor (`Identity`: address, e-mail, name) and **classify** what
    they wrote (`Submission`), when it is worth it: a comment, a sign-up.
 4. **Decide** what a provider that does not answer means for this form (`UnreachableException`):
-   refuse it, or let it through and look later. Omniguard never decides it for you.
+   refuse it, or let it through and look later. Omnishield never decides it for you.
 
 The address is the visitor's as your application sees it: behind a proxy or a load balancer, the
 one it forwarded (Symfony: `trusted_proxies`), not the proxy's.
@@ -119,7 +119,7 @@ process - right for a test, a worker, the script above; behind PHP-FPM every req
 an empty one, and a solution could be posted twice. Share one:
 
 ```php
-use Omniguard\Replay\CacheReplayStore;
+use Omnishield\Replay\CacheReplayStore;
 use Symfony\Component\Cache\Adapter\RedisAdapter;   // any PSR-6 pool: filesystem, Redis, Memcached, APCu
 
 new AltchaGatewayFactory(new CacheReplayStore(new RedisAdapter(RedisAdapter::createConnection('redis://localhost'))));
@@ -131,8 +131,8 @@ something atomic - a table with a unique key, Redis's `SET NX`.
 
 ## In a framework
 
-- **Symfony**: `Omniguard\Bridge\Symfony\OmniguardBundle` registers the factories, builds the
-  registry from `config/packages/omniguard.yaml`, makes each gateway injectable by its name, and
+- **Symfony**: `Omnishield\Bridge\Symfony\OmnishieldBundle` registers the factories, builds the
+  registry from `config/packages/omnishield.yaml`, makes each gateway injectable by its name, and
   gives a form field, a constraint, a route and a Twig function: see [Symfony](symfony.md).
 - **Any other**: build the `Registry` once, where the framework builds its services, as the script
   above does; give it the framework's HTTP client and a shared store.
@@ -147,4 +147,4 @@ something atomic - a table with a unique key, Redis's `SET NX`.
 | `InvalidConfigException` | a gateway not configured, a factory not installed, an option missing, a submission without what the provider needs |
 | `NotSupportedException` | the gateway does not answer that question, or does not take reports |
 
-All implement `Omniguard\Exception\OmniguardException`.
+All implement `Omnishield\Exception\OmnishieldException`.

@@ -5,13 +5,13 @@ order: 6
 
 # The Docker harness
 
-`docker/` runs this package with every `omniguard/*` gateway installed - from GitHub (branch
-1.x), or from the checkouts beside this one when `OMNIGUARD_PLUGINS=../..` is set in
+`docker/` runs this package with every `omnishield/*` gateway installed - from GitHub (branch
+1.x), or from the checkouts beside this one when `OMNISHIELD_PLUGINS=../..` is set in
 `docker/.env` - with a console and a script in bare PHP.
 
 ```sh
 cd docker && cp .env.dist .env       # the keys you have; none is needed
-docker compose run --rm omniguard gateways
+docker compose run --rm omnishield gateways
 ```
 
 | Command | |
@@ -31,7 +31,7 @@ providers' own testing keys - Cloudflare's dummy keys, Google's v2 test keys -, 
 ALTCHA, and for Akismet a key only the recorded answers accept.
 
 ```
-$ docker compose run --rm omniguard verify turnstile XXXX.DUMMY.TOKEN.XXXX --ip 192.0.2.10
+$ docker compose run --rm omnishield verify turnstile XXXX.DUMMY.TOKEN.XXXX --ip 192.0.2.10
 {
     "at": "2026-10-07T00:55:07+00:00",
     "passed": true,
@@ -44,8 +44,8 @@ $ docker compose run --rm omniguard verify turnstile XXXX.DUMMY.TOKEN.XXXX --ip 
     ]
 }
 
-$ T=$(docker compose run --rm -T omniguard solve altcha --action contact)
-$ docker compose run --rm omniguard verify altcha "$T" --action contact     # passes: each run has its own memory of spent tokens
+$ T=$(docker compose run --rm -T omnishield solve altcha --action contact)
+$ docker compose run --rm omnishield verify altcha "$T" --action contact     # passes: each run has its own memory of spent tokens
 ```
 
 ## Bare: no bundle, no container
@@ -58,8 +58,8 @@ whole question of each, and lists what PHP loaded - exit 1 if a class of a frame
 `Validator`, `Routing`, a bundle or a bridge, Doctrine, Twig):
 
 ```
-$ docker compose run --rm omniguard bare --live
-Omniguard in bare PHP: the registry built by hand, no bundle, no container; the providers themselves.
+$ docker compose run --rm omnishield bare --live
+Omnishield in bare PHP: the registry built by hand, no bundle, no container; the providers themselves.
 
   altcha         ALTCHA: answers challenge; third party no, cookies no (example settings)
   turnstile      Cloudflare Turnstile: answers challenge; third party yes, cookies no (example settings)
@@ -99,5 +99,5 @@ process of its own and checks the list - of Symfony, only the HTTP client the pr
 through.
 
 The image is `php:8.4-cli-alpine` with Composer; the harness's packages live in the `harness`
-volume of the `omniguard-harness` project. The gateways are cloned from GitHub as plain git
+volume of the `omnishield-harness` project. The gateways are cloned from GitHub as plain git
 repositories over HTTPS: no GitHub API, no ssh in the image.

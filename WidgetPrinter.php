@@ -1,8 +1,8 @@
 <?php
 
-namespace Omniguard;
+namespace Omnishield;
 
-use Omniguard\Model\Widget;
+use Omnishield\Model\Widget;
 
 /**
  * Prints widgets for one page: a provider's script once, however many forms

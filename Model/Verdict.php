@@ -1,6 +1,6 @@
 <?php
 
-namespace Omniguard\Model;
+namespace Omnishield\Model;
 
 /**
  * What a captcha said of a token: passed or not, and why - in the family's

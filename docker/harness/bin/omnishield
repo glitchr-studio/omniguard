@@ -3,4 +3,4 @@
 
 require '/harness/vendor/autoload.php';
 
-exit(Omniguard\Harness\Console::create()->run());
+exit(Omnishield\Harness\Console::create()->run());

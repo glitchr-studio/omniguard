@@ -1,18 +1,18 @@
 <?php
 
-namespace Omniguard\Tests;
+namespace Omnishield\Tests;
 
-use Omniguard\ChallengeIssuerInterface;
-use Omniguard\Config;
-use Omniguard\Exception\UnreachableException;
-use Omniguard\GatewayFactory;
-use Omniguard\GatewayInterface;
-use Omniguard\Model\Attempt;
-use Omniguard\Model\Capabilities;
-use Omniguard\Model\Verdict;
-use Omniguard\Model\Widget;
-use Omniguard\Replay\InMemoryReplayStore;
-use Omniguard\Replay\ReplayStoreInterface;
+use Omnishield\ChallengeIssuerInterface;
+use Omnishield\Config;
+use Omnishield\Exception\UnreachableException;
+use Omnishield\GatewayFactory;
+use Omnishield\GatewayInterface;
+use Omnishield\Model\Attempt;
+use Omnishield\Model\Capabilities;
+use Omnishield\Model\Verdict;
+use Omnishield\Model\Widget;
+use Omnishield\Replay\InMemoryReplayStore;
+use Omnishield\Replay\ReplayStoreInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
@@ -31,9 +31,9 @@ final class StubFactory extends GatewayFactory
     protected function populate(Config $c): void
     {
         $c->defaults([
-            'omniguard.factory_name' => 'stub',
-            'omniguard.factory_title' => 'Stub',
-            'omniguard.required_options' => ['secret'],
+            'omnishield.factory_name' => 'stub',
+            'omnishield.factory_title' => 'Stub',
+            'omnishield.required_options' => ['secret'],
         ]);
     }
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace Omniguard;
+namespace Omnishield;
 
-use Omniguard\Model\Attempt;
-use Omniguard\Model\Verdict;
-use Omniguard\Model\Widget;
+use Omnishield\Model\Attempt;
+use Omnishield\Model\Verdict;
+use Omnishield\Model\Widget;
 
 /**
  * Is this token valid? A captcha: the page shows a widget, the visitor's
